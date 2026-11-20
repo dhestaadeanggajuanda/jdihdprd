@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-20T00:00:00Z",
+  "title": "Design System: JDIH DPRD Kota Singkawang",
+  "extensions": {
+    "colorMeta": {
+      "navy": { "role": "primary", "displayName": "Navy Resmi", "canonical": "#1f2b55", "dark": "#1b2442", "tonalRamp": ["#0d1330", "#151d40", "#1f2b55", "#2b3a6e", "#4a5a94", "#7b8ac0", "#b4bfdd", "#e3eafb"] },
+      "blue": { "role": "primary", "displayName": "Biru Aksi", "canonical": "#1f4fc9", "dark": "#8ba7ff", "tonalRamp": ["#0f2766", "#16388f", "#1a43ab", "#1f4fc9", "#4f78dc", "#8ba7ff", "#c3d1f7", "#e3eafb"] },
+      "blue-tint": { "role": "primary", "displayName": "Tinta Biru Muda", "canonical": "#e3eafb", "dark": "#22305f", "tonalRamp": ["#22305f", "#3a4c85", "#5f74b5", "#8fa1d4", "#b8c5e8", "#d0dbf5", "#e3eafb", "#f0f4fd"] },
+      "ground": { "role": "neutral", "displayName": "Landasan Dingin", "canonical": "#f3f5fa", "dark": "#0c1224", "tonalRamp": ["#0c1224", "#131b33", "#1b2442", "#414d6e", "#7c88ab", "#d5dbea", "#eaeff8", "#f3f5fa"] },
+      "surface": { "role": "neutral", "displayName": "Permukaan", "canonical": "#ffffff", "dark": "#131b33", "tonalRamp": ["#131b33", "#1b2442", "#2a3556", "#5f6c95", "#b4bfdd", "#d5dbea", "#eaeff8", "#ffffff"] },
+      "ink": { "role": "neutral", "displayName": "Tinta", "canonical": "#121a36", "dark": "#e7ecfa", "tonalRamp": ["#121a36", "#414d6e", "#586487", "#7c88ab", "#93a0c6", "#b4bfdd", "#d5dbea", "#e7ecfa"] },
+      "ok": { "role": "secondary", "displayName": "Hijau Berlaku", "canonical": "#0f6b3c", "dark": "#6fd6a0", "background": { "light": "#e2f3e9", "dark": "#12301f" }, "chart": { "light": "#0f6b3c", "dark": "#2fa874" }, "tonalRamp": ["#08381f", "#0b4f2c", "#0f6b3c", "#2fa874", "#6fd6a0", "#a9e6c5", "#c9f0db", "#e2f3e9"] },
+      "warn": { "role": "secondary", "displayName": "Ambar Diubah", "canonical": "#7f4600", "dark": "#f2b25c", "background": { "light": "#fdebd0", "dark": "#3a2a0b" }, "chart": { "light": "#c77700", "dark": "#ba880a" }, "tonalRamp": ["#3a2000", "#5c3300", "#7f4600", "#c77700", "#e39a2e", "#f2b25c", "#f8d29b", "#fdebd0"] },
+      "bad": { "role": "secondary", "displayName": "Merah Dicabut", "canonical": "#a3222a", "dark": "#ff9aa0", "background": { "light": "#fbe3e4", "dark": "#3c1418" }, "chart": { "light": "#a3222a", "dark": "#e8485e" }, "tonalRamp": ["#4d0f13", "#751920", "#a3222a", "#c9444c", "#e8485e", "#ff9aa0", "#fbc4c7", "#fbe3e4"] },
+      "notify-orange": { "role": "tertiary", "displayName": "Oranye Notifikasi", "canonical": "#c2410c", "dark": "#ff8a5c", "tonalRamp": ["#5c1f06", "#83300a", "#c2410c", "#e0622c", "#ff8a5c", "#ffb08f", "#ffd3c0", "#ffeadf"] }
+    },
+    "darkTheme": {
+      "selector": "[data-theme='dark']",
+      "tokens": {
+        "navy": "#1b2442", "navy-2": "#26325c", "on-navy": "#e7ecfa", "on-navy-2": "#b4bfdd",
+        "blue": "#8ba7ff", "blue-hover": "#a9beff", "blue-tint": "#22305f", "on-blue": "#0c1224",
+        "ground": "#0c1224", "surface": "#131b33", "surface-2": "#1b2442",
+        "line": "#2a3556", "line-strong": "#5f6c95",
+        "ink": "#e7ecfa", "ink-2": "#b4bfdd", "ink-3": "#93a0c6",
+        "ok": "#6fd6a0", "ok-bg": "#12301f", "warn": "#f2b25c", "warn-bg": "#3a2a0b",
+        "bad": "#ff9aa0", "bad-bg": "#3c1418", "focus": "#8ba7ff", "orange": "#ff8a5c",
+        "shadow": "rgba(0,0,0,0.6)"
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Judul hero Beranda saja: 1.625rem ponsel, 2.25rem tablet, 3rem desktop." },
+      "headline": { "displayName": "Headline", "purpose": "Judul halaman dan judul dokumen (1.625rem ke 2rem)." },
+      "title": { "displayName": "Title", "purpose": "Judul seksi, sheet, keadaan kosong (1.25rem); panel 1.125rem." },
+      "body": { "displayName": "Body", "purpose": "Teks isi 1rem/1.5rem; prosa maks 68ch." },
+      "label": { "displayName": "Label", "purpose": "Tombol, chip, tab, label kolom, bobot 500." },
+      "caption": { "displayName": "Caption", "purpose": "Lencana, meta, tanggal; 0.75-0.8125rem." }
+    },
+    "textScale": [
+      { "name": "normal", "value": "100%", "selector": "html" },
+      { "name": "large", "value": "112.5%", "selector": ":root[data-text='large']" },
+      { "name": "xlarge", "value": "125%", "selector": ":root[data-text='xlarge']" }
+    ],
+    "shadows": [
+      { "name": "sheet", "value": "0 -8px 32px var(--shadow)", "purpose": "Bottom sheet filter dan notifikasi." },
+      { "name": "snackbar", "value": "0 4px 16px var(--shadow)", "purpose": "Toast sementara." },
+      { "name": "field-focus-halo", "value": "0 0 0 3px color-mix(in srgb, var(--blue) 30%, transparent)", "purpose": "Halo fokus kolom isian." },
+      { "name": "hero-text", "value": "0 1px 3px rgb(0 0 0/0.3)", "purpose": "Keterbacaan judul hero di atas foto." }
+    ],
+    "motion": [
+      { "name": "hero-crossfade", "value": "opacity 1s ease", "purpose": "Pergantian foto hero (ganti tiap 6 dtk, dapat dijeda)." },
+      { "name": "slider-dot", "value": "width .25s ease, background-color .25s ease", "purpose": "Titik slider aktif." },
+      { "name": "shimmer", "value": "1.4s linear infinite", "purpose": "Kerangka memuat." },
+      { "name": "reduced-motion", "value": "animation: none; transition: none", "purpose": "prefers-reduced-motion mematikan semuanya." }
+    ],
+    "breakpoints": [
+      { "name": "phone", "value": "<600px", "purpose": "Bottom bar, gutter 16px." },
+      { "name": "tablet", "value": "600px", "purpose": "Rail 80px, gutter 24px." },
+      { "name": "search-row", "value": "768px", "purpose": "Kartu pencarian satu baris." },
+      { "name": "desktop", "value": "1024px", "purpose": "Header navigasi 72px, gutter 32px, filter panel 304px." },
+      { "name": "wide", "value": "1200px", "purpose": "Kolom cari header 208px; lebar konten maks 1200px." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Aksi utama (Cari, Unduh PDF).",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Cari</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border:1.5px solid transparent;border-radius:12px;font:500 1rem/1.5rem 'Public Sans',system-ui,sans-serif;cursor:pointer}.ds-btn-primary{background:var(--blue,#1f4fc9);color:var(--on-blue,#fff)}.ds-btn-primary:hover{background:var(--blue-hover,#1a43ab)}.ds-btn:focus-visible{outline:3px solid var(--focus,#1f4fc9);outline-offset:2px}"
+    },
+    {
+      "name": "Tonal Button",
+      "kind": "button",
+      "refersTo": "button-tonal",
+      "description": "Aksi sekunder (Salin kutipan, Terapkan).",
+      "html": "<button class=\"ds-btn-tonal\">Salin kutipan</button>",
+      "css": ".ds-btn-tonal{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border:1.5px solid transparent;border-radius:12px;background:var(--blue-tint,#e3eafb);color:var(--navy,#1f2b55);font:500 1rem/1.5rem 'Public Sans',system-ui,sans-serif;cursor:pointer}.ds-btn-tonal:focus-visible{outline:3px solid var(--focus,#1f4fc9);outline-offset:2px}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Aksi tersier berbingkai.",
+      "html": "<button class=\"ds-btn-outline\">Lihat semua</button>",
+      "css": ".ds-btn-outline{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border:1.5px solid var(--line-strong,#7c88ab);border-radius:12px;background:none;color:var(--blue,#1f4fc9);font:500 1rem/1.5rem 'Public Sans',system-ui,sans-serif;cursor:pointer}.ds-btn-outline:hover{background:var(--surface-2,#eaeff8)}.ds-btn-outline:focus-visible{outline:3px solid var(--focus,#1f4fc9);outline-offset:2px}"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Kolom isian dengan ikon awalan; fokus berbingkai biru + halo.",
+      "html": "<label class=\"ds-field\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/></svg><input placeholder=\"Cari kata kunci\"></label>",
+      "css": ".ds-field{display:flex;align-items:center;gap:8px;min-height:52px;padding:0 14px;background:var(--surface,#fff);border:1.5px solid var(--line-strong,#7c88ab);border-radius:12px;color:var(--ink,#121a36)}.ds-field svg{color:var(--ink-3,#586487);flex:none}.ds-field input{flex:1;min-width:0;border:0;outline:0;background:none;font:400 1rem/1.5rem 'Public Sans',system-ui,sans-serif;color:inherit}.ds-field input::placeholder{color:var(--ink-3,#586487);opacity:1}.ds-field:focus-within{border-color:var(--blue,#1f4fc9);box-shadow:0 0 0 3px color-mix(in srgb,var(--blue,#1f4fc9) 30%,transparent)}"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Chip filter, terpilih berlatar biru muda.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"false\">Perda</button> <button class=\"ds-chip\" aria-pressed=\"true\">Perwali</button>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border:1px solid var(--line-strong,#7c88ab);border-radius:8px;background:var(--surface,#fff);color:var(--ink,#121a36);font:500 .875rem/1.25rem 'Public Sans',system-ui,sans-serif;cursor:pointer}.ds-chip[aria-pressed=true]{background:var(--blue-tint,#e3eafb);border-color:var(--blue-tint,#e3eafb);color:var(--navy,#1f2b55)}.ds-chip:focus-visible{outline:3px solid var(--focus,#1f4fc9);outline-offset:2px}"
+    },
+    {
+      "name": "Status Badges",
+      "kind": "chip",
+      "refersTo": "status-ok",
+      "description": "Status dokumen: ikon + kata + warna.",
+      "html": "<span class=\"ds-status ds-ok\">Berlaku</span> <span class=\"ds-status ds-warn\">Diubah</span> <span class=\"ds-status ds-bad\">Dicabut</span>",
+      "css": ".ds-status{display:inline-flex;align-items:center;gap:4px;min-height:24px;padding:0 8px 0 6px;border-radius:6px;font:700 .75rem/1rem 'Public Sans',system-ui,sans-serif}.ds-ok{background:var(--ok-bg,#e2f3e9);color:var(--ok,#0f6b3c)}.ds-warn{background:var(--warn-bg,#fdebd0);color:var(--warn,#7f4600)}.ds-bad{background:var(--bad-bg,#fbe3e4);color:var(--bad,#a3222a)}"
+    },
+    {
+      "name": "Document Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Hasil pencarian: jenis, status, nomor tebal navy, judul, kaki aksi; tanpa bayangan.",
+      "html": "<article class=\"ds-card\"><span class=\"ds-status ds-ok\">Berlaku</span><h3><b>Perda Nomor 3 Tahun 2021</b>tentang Pajak Daerah</h3><div class=\"ds-foot\">Ditetapkan 12 Mei 2021</div></article>",
+      "css": ".ds-card{background:var(--surface,#fff);border:1px solid var(--line,#d5dbea);border-radius:12px;padding:16px;color:var(--ink,#121a36);font-family:'Public Sans',system-ui,sans-serif}.ds-card:hover{border-color:var(--line-strong,#7c88ab)}.ds-card h3{margin:12px 0;font-size:1rem;line-height:1.5rem;font-weight:400}.ds-card h3 b{display:block;font-weight:700;color:var(--navy,#1f2b55)}.ds-foot{padding-top:12px;border-top:1px solid var(--line,#d5dbea);font-size:.875rem;color:var(--ink-3,#586487)}.ds-status{display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border-radius:6px;font:700 .75rem/1rem inherit}.ds-ok{background:var(--ok-bg,#e2f3e9);color:var(--ok,#0f6b3c)}"
+    },
+    {
+      "name": "Bottom Navigation Bar",
+      "kind": "nav",
+      "refersTo": "nav-bar",
+      "description": "Navigasi ponsel: ikon di pil, aktif berlatar biru muda dan label tebal.",
+      "html": "<nav class=\"ds-nav\"><a aria-current=\"page\"><span class=\"ds-pill\"></span>Beranda</a><a><span class=\"ds-pill\"></span>Cari</a></nav>",
+      "css": ".ds-nav{display:flex;background:var(--surface-2,#eaeff8);border-top:1px solid var(--line,#d5dbea);padding:12px 8px 20px}.ds-nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font:500 .75rem/1rem 'Public Sans',system-ui,sans-serif;color:var(--ink-2,#414d6e);text-decoration:none}.ds-pill{width:64px;height:32px;border-radius:16px}.ds-nav a[aria-current=page]{color:var(--ink,#121a36);font-weight:700}.ds-nav a[aria-current=page] .ds-pill{background:var(--blue-tint,#e3eafb)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Loket Resmi yang Rapi",
+    "overview": "Sistem ini sengaja memakai standar kategori (arah \"canon\", dikonfirmasi pengguna): konvensi portal JDIH dan Material 3 diambil apa adanya, dan satu-satunya pembeda adalah kualitas eksekusi. Pengunjung harus langsung mengenali sumber resmi produk hukum, mencari lewat nomor + tahun atau kata kunci, lalu membaca jenis, Nomor/Tahun, dan status berlaku atau dicabut tanpa membuka dokumen. Tidak ada tanda tangan visual yang diselipkan; kerapian ritme, kontras, dan target sentuh adalah desainnya.\n\nPermukaannya dingin dan datar: landasan abu kebiruan, kartu putih berbingkai tipis, navy untuk elemen aktif dan hero, biru tegas untuk aksi. Hero memakai foto dokumentasi sidang yang bergantian di bawah selubung navy 72% sehingga teks putih tetap terbaca di atas foto apa pun. Satu keluarga sans (Public Sans, di-host sendiri) menanggung semua peran. Ponsel dirancang sebagai tujuan utama, bukan desktop yang diperkecil.",
+    "keyCharacteristics": [
+      "Pencarian di pusat: kartu putih di atas hero foto, tab Kata kunci dan Nomor & tahun.",
+      "Status selalu berupa ikon + teks + warna, tidak pernah warna saja.",
+      "Datar: kartu tanpa bayangan; kedalaman lewat lapisan nada dan garis tipis.",
+      "Terang dan gelap penuh (Sistem/Terang/Gelap), skala teks 100/112,5/125% lewat rem.",
+      "Target sentuh minimal 44-48px, fokus 3px terlihat di semua kontrol."
+    ],
+    "rules": [
+      { "name": "The Status Triplet Rule", "body": "Status dokumen selalu berupa warna + ikon + kata. Warna saja tidak pernah cukup.", "section": "colors" },
+      { "name": "The One Action Blue Rule", "body": "Biru aksi adalah satu-satunya warna interaktif dan satu-satunya warna seri grafik; navy menandai \"sedang aktif/resmi\", bukan \"bisa diklik\".", "section": "colors" },
+      { "name": "The Veil Rule", "body": "Teks di atas foto hero hanya berdiri di atas selubung navy seragam 72%; tanpa selubung, tanpa teks di atas foto.", "section": "colors" },
+      { "name": "The Rem Only Rule", "body": "Ukuran teks selalu rem. Piksel untuk teks merusak pengaturan \"Ukuran teks\" dan skala sistem.", "section": "typography" },
+      { "name": "The Tabular Numerals Rule", "body": "Angka yang dibandingkan antarbaris (jumlah, tahun, nilai grafik) memakai angka tabular.", "section": "typography" },
+      { "name": "The Flat Cards Rule", "body": "Kartu, panel, dan daftar tidak pernah berbayang; hanya sheet dan snackbar yang melayang.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do tampilkan jenis, Nomor/Tahun, dan status (ikon + kata + warna) pada setiap hasil.",
+      "Do tulis ukuran teks dalam rem dan uji pada skala 125%.",
+      "Do jaga target sentuh 44-48px dan cincin fokus 3px (putih di atas hero).",
+      "Do definisikan setiap warna baru untuk mode terang dan gelap sekaligus.",
+      "Do beri setiap grafik tabel padanan dan pakai satu warna seri (`blue`).",
+      "Do letakkan teks di atas foto hanya di bawah selubung navy 72%."
+    ],
+    "donts": [
+      "Don't pakai bayangan pada kartu atau daftar.",
+      "Don't pakai warna saja untuk menandai status atau seri data.",
+      "Don't jadikan navy warna tautan atau tombol; itu peran biru aksi.",
+      "Don't perkecil tampilan desktop untuk ponsel; ponsel memakai bottom bar dan bottom sheet.",
+      "Don't minta sumber daya pihak ketiga (font, ikon, gambar); semua di-host sendiri.",
+      "Don't menambah keluarga font kedua atau ikon berbasis glyph/emoji."
+    ]
+  }
+}

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Galeri mockup · JDIH DPRD Kota Singkawang</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="mockup.css">
+</head>
+<body style="padding-bottom:0">
+<a class="skip" href="#main">Lewati ke konten utama</a>
+<main id="main" class="wrap gallery">
+<div class="gal-h">
+<div>
+<h1>Mockup JDIH DPRD Kota Singkawang</h1>
+<p style="margin-top:4px;color:var(--ink-2);max-width:62ch">Arah visual: standar kategori, dikerjakan serapi mungkin. Status: <b>menunggu persetujuan Anda</b>. Belum ada kode aplikasi (Vue, Quasar, API) yang ditulis.</p>
+</div>
+<button class="btn btn-outline" type="button" data-theme-toggle>Ganti tema terang/gelap</button>
+</div>
+
+<section class="card gal-note" aria-labelledby="g-cara">
+<h2 id="g-cara">Cara meninjau</h2>
+<ul>
+<li>Klik gambar untuk PNG ukuran penuh, atau <b>Buka halaman</b> lalu ubah lebar jendela peramban (360, 768, 1280 px). Tambahkan <code>?theme=dark</code> pada alamat untuk mode gelap.</li>
+<li>Semua dokumen dan angka adalah <b>contoh</b>. Judul, tanggal, dan gambar berita adalah nyata dari Media Center. Logo masih placeholder beresolusi rendah.</li>
+<li>Pada tiap layar periksa: apakah tugas utama (cari, pastikan status, telusuri) terbaca tanpa petunjuk, apakah terasa terlalu padat di ponsel, dan apakah ada yang terasa generik.</li>
+</ul>
+</section>
+
+<div class="tiles" style="grid-template-columns:minmax(0,1fr)">
+
+<section class="card tile" aria-labelledby="t1">
+<h2 id="t1">1. Beranda</h2>
+<ul><li>Hero berlatar <b>slider foto</b> (tiga foto contoh dari Media Center, bergantian tiap 6 detik) mengikuti jdihsetwan.cianjurkab.go.id. Ada tombol jeda, titik, dan panah di desktop; gerak dikurangi menghentikan pergantian otomatis.</li><li>Layar pertama ponsel memuat pencarian, strip berita terbaru, dan keempat koleksi.</li><li>Pencarian punya dua mode: kata kunci, dan nomor + tahun.</li></ul>
+<div class="shots">
+<a href="png/beranda-360.png"><img src="png/beranda-360-fold.png" alt="Beranda di ponsel 360 piksel, layar pertama" loading="lazy"><span>Ponsel 360 · layar pertama</span></a>
+<a href="png/beranda-360-gelap.png"><img src="png/beranda-360-gelap.png" alt="Beranda di ponsel dalam mode gelap" loading="lazy"><span>Ponsel · gelap</span></a>
+<a href="png/beranda-768.png"><img src="png/beranda-768-fold.png" alt="Beranda di tablet 768 piksel dengan rail navigasi" loading="lazy"><span>Tablet 768</span></a>
+<a href="png/beranda-1280.png"><img src="png/beranda-1280-fold.png" alt="Beranda di desktop 1280 piksel" loading="lazy"><span>Desktop 1280</span></a>
+<a href="png/beranda-1280-foto2.png"><img src="png/beranda-1280-foto2.png" alt="Beranda di desktop dengan foto latar kedua" loading="lazy"><span>Desktop · foto 2</span></a>
+<a href="png/beranda-1280-foto3.png"><img src="png/beranda-1280-foto3.png" alt="Beranda di desktop dengan foto latar ketiga" loading="lazy"><span>Desktop · foto 3</span></a>
+<a href="png/beranda-1280-gelap.png"><img src="png/beranda-1280-gelap.png" alt="Beranda di desktop dalam mode gelap" loading="lazy"><span>Desktop · gelap</span></a>
+</div>
+<div class="go"><a class="btn btn-tonal" href="beranda.html">Buka halaman</a></div>
+</section>
+
+<section class="card tile" aria-labelledby="t2">
+<h2 id="t2">2. Hasil pencarian dan filter</h2>
+<ul><li>Setiap kartu menampilkan jenis, <b>status (ikon + teks)</b>, nomor dan tahun, serta riwayat ubah/cabut.</li><li>Ponsel memakai bottom sheet untuk filter, desktop memakai panel di kiri.</li></ul>
+<div class="shots">
+<a href="png/hasil-360.png"><img src="png/hasil-360-fold.png" alt="Hasil pencarian di ponsel" loading="lazy"><span>Ponsel 360</span></a>
+<a href="png/hasil-360-filter.png"><img src="png/hasil-360-filter.png" alt="Bottom sheet filter terbuka di ponsel" loading="lazy"><span>Filter terbuka</span></a>
+<a href="png/hasil-360-gelap.png"><img src="png/hasil-360-gelap.png" alt="Hasil pencarian di ponsel mode gelap" loading="lazy"><span>Ponsel · gelap</span></a>
+<a href="png/hasil-768.png"><img src="png/hasil-768-fold.png" alt="Hasil pencarian di tablet" loading="lazy"><span>Tablet 768</span></a>
+<a href="png/hasil-1280.png"><img src="png/hasil-1280-fold.png" alt="Hasil pencarian di desktop dengan panel filter" loading="lazy"><span>Desktop 1280</span></a>
+</div>
+<div class="go"><a class="btn btn-tonal" href="hasil.html">Buka halaman</a><a class="btn btn-outline" href="hasil.html#filter">Buka dengan filter terbuka</a></div>
+</section>
+
+<section class="card tile" aria-labelledby="t3">
+<h2 id="t3">3. Detail dokumen</h2>
+<ul><li>Status keberlakuan dan riwayat langsung di bawah judul, dengan kutipan resmi yang bisa disalin.</li><li>Relasi peraturan dikelompokkan: mencabut, diubah oleh.</li></ul>
+<div class="shots">
+<a href="png/detail-360.png"><img src="png/detail-360-fold.png" alt="Detail dokumen di ponsel" loading="lazy"><span>Ponsel 360</span></a>
+<a href="png/detail-1280.png"><img src="png/detail-1280-fold.png" alt="Detail dokumen di desktop" loading="lazy"><span>Desktop 1280</span></a>
+<a href="png/detail-1280-gelap.png"><img src="png/detail-1280-gelap.png" alt="Detail dokumen di desktop mode gelap" loading="lazy"><span>Desktop · gelap</span></a>
+</div>
+<div class="go"><a class="btn btn-tonal" href="detail.html">Buka halaman</a></div>
+</section>
+
+<section class="card tile" aria-labelledby="t4">
+<h2 id="t4">4. Berita (Media Center)</h2>
+<ul><li>Topik disaring dari satu variabel <code>.env</code> dan ditampilkan apa adanya. Artikel dibuka di situs asal.</li></ul>
+<div class="shots">
+<a href="png/berita-360.png"><img src="png/berita-360-fold.png" alt="Daftar berita di ponsel" loading="lazy"><span>Ponsel 360</span></a>
+<a href="png/berita-1280.png"><img src="png/berita-1280-fold.png" alt="Daftar berita di desktop" loading="lazy"><span>Desktop 1280</span></a>
+</div>
+<div class="go"><a class="btn btn-tonal" href="berita.html">Buka halaman</a></div>
+</section>
+
+<section class="card tile" aria-labelledby="t5">
+<h2 id="t5">5. Statistik</h2>
+<ul><li>Batang satu warna untuk perbandingan, batang segmen untuk status, dan setiap grafik punya padanan tabel. Warna status sudah divalidasi untuk buta warna di kedua tema.</li></ul>
+<div class="shots">
+<a href="png/statistik-360.png"><img src="png/statistik-360-fold.png" alt="Statistik di ponsel" loading="lazy"><span>Ponsel 360</span></a>
+<a href="png/statistik-1280.png"><img src="png/statistik-1280-fold.png" alt="Statistik di desktop" loading="lazy"><span>Desktop 1280</span></a>
+<a href="png/statistik-1280-gelap.png"><img src="png/statistik-1280-gelap.png" alt="Statistik di desktop mode gelap" loading="lazy"><span>Desktop · gelap</span></a>
+</div>
+<div class="go"><a class="btn btn-tonal" href="statistik.html">Buka halaman</a></div>
+</section>
+
+<section class="card tile" aria-labelledby="t6">
+<h2 id="t6">6. Tentang dan Info</h2>
+<ul><li>Info adalah tab kelima di ponsel: halaman Tentang Kami, pengaturan notifikasi peraturan baru, tema, dan ukuran teks.</li></ul>
+<div class="shots">
+<a href="png/info-360.png"><img src="png/info-360-fold.png" alt="Tab Info di ponsel" loading="lazy"><span>Info · ponsel</span></a>
+<a href="png/tentang-360.png"><img src="png/tentang-360-fold.png" alt="Halaman Dasar Hukum di ponsel" loading="lazy"><span>Tentang · ponsel</span></a>
+<a href="png/tentang-1280.png"><img src="png/tentang-1280-fold.png" alt="Halaman Dasar Hukum di desktop" loading="lazy"><span>Tentang · desktop</span></a>
+</div>
+<div class="go"><a class="btn btn-tonal" href="info.html">Buka Info</a><a class="btn btn-outline" href="tentang.html">Buka Tentang</a></div>
+</section>
+
+<section class="card tile" aria-labelledby="t7">
+<h2 id="t7">7. Keadaan dan izin notifikasi</h2>
+<ul><li>Hasil kosong, gagal memuat, tanpa koneksi, memuat, 404, penjelasan izin notifikasi Android, dan contoh notifikasi sistem.</li></ul>
+<div class="shots">
+<a href="png/keadaan-1280.png"><img src="png/keadaan-1280.png" alt="Kumpulan keadaan dan izin notifikasi" loading="lazy"><span>Semua keadaan</span></a>
+</div>
+<div class="go"><a class="btn btn-tonal" href="keadaan.html">Buka halaman</a></div>
+</section>
+
+</div>
+
+<section class="card gal-note" aria-labelledby="g-token">
+<h2 id="g-token">Sistem desain yang dikunci (bahan DESIGN.md)</h2>
+<p style="color:var(--ink-2);font-size:15px;line-height:22px">Warna cangkang berasal dari teks logo. Semua pasangan teks lolos 4,5:1 di tema terang dan gelap. Tipografi: Public Sans (di-host sendiri, bukan font bawaan model). Jarak kelipatan 4 px, radius 8, 12, dan 16 px, target sentuh 48 px, tanpa bayangan pada kartu.</p>
+<div class="swatches">
+<div class="sw"><i style="background:#1F2B55"></i><b>Navy cangkang</b>#1F2B55</div>
+<div class="sw"><i style="background:#1F4FC9"></i><b>Biru aksi</b>#1F4FC9</div>
+<div class="sw"><i style="background:#F3F5FA"></i><b>Landasan</b>#F3F5FA</div>
+<div class="sw"><i style="background:#121A36"></i><b>Teks utama</b>#121A36</div>
+<div class="sw"><i style="background:#E2F3E9;border-color:#0F6B3C"></i><b>Berlaku</b>#0F6B3C</div>
+<div class="sw"><i style="background:#FDEBD0;border-color:#7F4600"></i><b>Diubah</b>#7F4600</div>
+<div class="sw"><i style="background:#FBE3E4;border-color:#A3222A"></i><b>Dicabut</b>#A3222A</div>
+</div>
+</section>
+
+<section class="card gal-note" aria-labelledby="g-putus">
+<h2 id="g-putus">Yang perlu Anda putuskan</h2>
+<ol>
+<li><b>Persetujuan mockup.</b> Apa yang dilanjutkan dan apa yang terasa salah? Setelah disetujui, baru fase kode dimulai.</li>
+<li><b>Notifikasi peraturan baru (wajib v1).</b> Mekanisme belum diputuskan. Kandidat: langganan topik FCM dengan pengirim di server, agar API tetap GET saja dan database tetap read-only. Perlu proyek Firebase milik instansi dan menyentuh pihak ketiga (Google).</li>
+<li><b>Saringan berita.</b> Kata kunci "dewan" memuat berita kebudayaan yang bukan soal DPRD. Pertimbangkan <code>produk hukum,peraturan daerah,dprd</code>.</li>
+<li><b>Logo resmi dan pedoman identitas.</b> Placeholder sekarang berukuran 200x50 px dan bertulisan gelap, jadi harus berada di bidang terang.</li>
+<li><b>Foto resmi untuk hero, serta alamat dan kontak footer.</b> Hero kini berlatar slider foto, tetapi ketiga fotonya hanya contoh dari Media Center (700 px). Produksi butuh foto gedung atau ruang paripurna berhak pakai, minimal 1920x1080. Agar tetap ringan di jaringan lambat, foto pertama dimuat langsung, dua lainnya menyusul, dan tiap foto diekspor sekitar 150 KB.</li>
+</ol>
+</section>
+</main>
+<script>
+(function(){var r=document.documentElement,t=new URLSearchParams(location.search).get('theme');try{t=t||localStorage.getItem('mock-theme')}catch(e){}
+if(t==='dark'||t==='light')r.dataset.theme=t;
+document.addEventListener('click',function(e){var b=e.target.closest('[data-theme-toggle]');if(b){var n=r.dataset.theme==='dark'?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('mock-theme',n)}catch(x){}}})})();
+</script>
+</body>
+</html>

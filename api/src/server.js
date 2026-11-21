@@ -85,9 +85,12 @@ export async function buildServer({ db, cfg, logger = false }) {
     }
   })
 
-  // Respons JSON boleh di-cache sebentar; data berubah jarang.
+  // Respons sukses boleh di-cache sebentar (data berubah jarang). Respons galat (4xx/5xx, termasuk
+  // 429 dan 500) TIDAK boleh disimpan perantara: galat milik satu klien/saat bisa disajikan ke
+  // semua orang bila ada CDN atau cache di depan API.
   app.addHook('onSend', async (req, reply, payload) => {
-    if (!reply.hasHeader('Cache-Control'))
+    if (reply.statusCode >= 400) reply.header('Cache-Control', 'no-store')
+    else if (!reply.hasHeader('Cache-Control'))
       reply.header('Cache-Control', 'public, max-age=60')
     return payload
   })

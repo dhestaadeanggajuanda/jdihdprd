@@ -4,7 +4,9 @@
 //   HOST, PORT            alamat dengar (bawaan 127.0.0.1:3000; di belakang nginx)
 //   CORS_ORIGINS          daftar origin yang boleh memanggil API dari peramban, dipisah koma
 //                         (mis. https://jdih.dprd.singkawangkota.go.id,https://localhost untuk Android)
-//   TRUST_PROXY           1 bila di belakang nginx (memakai X-Forwarded-For untuk IP pembatas laju)
+//   TRUST_PROXY           alamat proxy tepercaya di depan API: "loopback" (nginx di mesin yang sama)
+//                         atau daftar IP/CIDR dipisah koma; kosong = tanpa proxy. "true" dan angka
+//                         ditolak (IP klien bisa dipalsukan untuk lolos dari batas laju)
 //   RATE_LIMIT_MAX        permintaan per menit per IP (bawaan 120)
 //   FILES_DIR             folder berkas dokumen (common/dokumen) di server
 //   FILES_MODE            "accel" (nginx X-Accel-Redirect, disarankan) atau "stream" (Node membaca berkas)
@@ -13,6 +15,39 @@
 //                         (bawaan bphn.jdihn.go.id,jdihn.go.id)
 //   PAGE_FILES_DIR        folder gambar halaman Tentang (struktur organisasi, SOP)
 //   API_SAMPLE            1 = tandai respons sebagai data contoh (hanya untuk lingkungan uji)
+
+import { isIP } from 'node:net'
+
+// TRUST_PROXY menentukan dari mana IP klien (kunci pembatas laju) dibaca. Hanya header
+// X-Forwarded-For dari proxy yang ALAMATNYA disebut di sini yang dipercaya; dari soket lain
+// header itu diabaikan, dan IP klien diambil dari kanan (entri terakhir yang bukan proxy
+// tepercaya), sehingga entri palsu di kiri tidak berpengaruh.
+// Sengaja ditolak: `true` ("percaya semua") dan angka hop (di Fastify bentuk angka tidak
+// berperilaku sebagai "jumlah proxy": IP klien jatuh ke alamat nginx, semua orang berbagi satu
+// keranjang batas laju), serta alamat/CIDR /0 ("semua alamat").
+// Diterima: `loopback` (nginx di mesin yang sama), IP, atau CIDR, dipisah koma. Kosong/0 = tanpa proxy.
+export function parseTrustProxy(v) {
+  const s = String(v ?? '').trim()
+  if (s === '' || s === '0') return false
+  const ok = x => {
+    if (x.toLowerCase() === 'loopback') return true
+    const [addr, bits, ...rest] = x.split('/')
+    const ver = isIP(addr)
+    if (ver === 0 || rest.length > 0) return false
+    if (bits === undefined) return true
+    return (
+      /^\d{1,3}$/.test(bits) &&
+      Number(bits) >= 1 &&
+      Number(bits) <= (ver === 4 ? 32 : 128)
+    )
+  }
+  const items = s.split(',').map(x => x.trim())
+  if (items.every(ok))
+    return items.map(x => (x.toLowerCase() === 'loopback' ? 'loopback' : x))
+  throw new Error(
+    'TRUST_PROXY tidak valid: isi "loopback" (nginx di mesin yang sama) atau daftar IP/CIDR proxy, mis. 127.0.0.1,10.0.0.0/8. "true" dan angka tidak diterima.'
+  )
+}
 
 const int = (v, d, min, max) => {
   const n = Number(v)
@@ -53,7 +88,7 @@ export function loadConfig(env = process.env) {
     host: env.HOST ?? '127.0.0.1',
     port: int(env.PORT, 3000, 1, 65535),
     corsOrigins,
-    trustProxy: env.TRUST_PROXY === '1',
+    trustProxy: parseTrustProxy(env.TRUST_PROXY),
     rateLimitMax: int(env.RATE_LIMIT_MAX, 120, 1, 100000),
     filesDir: env.FILES_DIR ?? '',
     filesMode,

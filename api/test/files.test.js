@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtemp, writeFile, mkdir, symlink, rm } from 'node:fs/promises'
+import { mkdtemp, writeFile, mkdir, symlink, rm, chmod } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
@@ -101,21 +101,35 @@ test('resolveLampiran: persen-encoding rusak di data tidak melempar galat', () =
   )
 })
 
-test('isRestricted: konservatif', () => {
+test('isRestricted: gagal-tertutup (nilai tak dikenal = dibatasi)', () => {
   for (const [a, p] of [
     ['Tertutup', null],
     ['terbatas', ''],
     ['Private', '-'],
     [null, 'Hanya untuk internal'],
-    ['Terbuka', 'Rahasia']
+    ['Terbuka', 'Rahasia'],
+    // nilai yang tidak ada di daftar-izin: dulu lolos karena hanya kata terlarang yang dicek
+    ['Hanya anggota', null],
+    ['login', null],
+    ['Internal', null],
+    ['1', null],
+    ['0', null],
+    ['tidak terbuka', null],
+    ['terbuka?', null],
+    ['x', '-']
   ])
     assert.equal(isRestricted(a, p), true, `${a} / ${p}`)
   for (const [a, p] of [
     [null, null],
     ['', ''],
+    ['-', '-'],
     ['Terbuka', '-'],
     ['Terbuka', 'Tidak ada'],
-    [null, 'tanpa pembatasan']
+    [null, 'tanpa pembatasan'],
+    ['Publik', null],
+    ['OPEN', '-'],
+    ['  Umum ', ''],
+    ['public', 'tidak']
   ])
     assert.equal(isRestricted(a, p), false, `${a} / ${p}`)
 })
@@ -159,3 +173,41 @@ test('openLocal: tetap di dalam folder (symlink keluar ditolak) dan hanya berkas
     await rm(base, { recursive: true, force: true })
   }
 })
+
+test('openLocal: isi terbaca penuh lewat aliran yang dikembalikan', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'jdih-files-'))
+  try {
+    await writeFile(join(dir, 'isi.pdf'), '%PDF isi lengkap')
+    const f = await openLocal(dir, 'isi.pdf')
+    const chunks = []
+    for await (const c of f.stream) chunks.push(c)
+    assert.equal(Buffer.concat(chunks).toString(), '%PDF isi lengkap')
+    assert.equal(f.size, 16)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+// Berkas ada tetapi proses tidak boleh membacanya (mis. 0600 milik pengguna lain pada volume):
+// harus gagal SEBELUM respons dimulai dan terlihat sebagai galat server, bukan 404 diam-diam
+// atau galat di tengah aliran yang membawa header unduhan. Root dan Windows tidak terkena
+// pemeriksaan izin, jadi tes ini hanya berarti bagi pengguna biasa di POSIX.
+const canTestPerms =
+  process.platform !== 'win32' && process.getuid && process.getuid() !== 0
+test(
+  'openLocal: berkas ada tetapi tak boleh dibaca -> EACCES dilempar (bukan null)',
+  { skip: canTestPerms ? false : 'butuh pengguna non-root di POSIX' },
+  async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'jdih-files-'))
+    try {
+      await writeFile(join(dir, 'tertutup.pdf'), '%PDF x')
+      await chmod(join(dir, 'tertutup.pdf'), 0o000)
+      await assert.rejects(() => openLocal(dir, 'tertutup.pdf'), {
+        code: 'EACCES'
+      })
+      assert.equal(await openLocal(dir, 'tidak-ada.pdf'), null)
+    } finally {
+      await rm(dir, { recursive: true, force: true })
+    }
+  }
+)

@@ -63,8 +63,25 @@ Nilai ditanam ke bundel saat build, jadi **publik** (jangan isi rahasia). Mengga
 | `npm test`                                 | Uji unit (Vitest)                                                                                                                            |
 | `npm run lint:security`                    | Gerbang keamanan statis (`scripts/check-security.mjs`)                                                                                       |
 | `npm run test:e2e`                         | Uji peramban sungguhan: alur, axe WCAG 2.2 AA, CSP, XSS, galat, offline. Jalankan `npm run dev` lebih dulu (`BASE_URL` bila port bukan 9000) |
-| `npm run test:api`                         | Uji API (49 tes). Butuh `TEST_DB_URL` ke database uji; tanpa itu tes yang butuh database dilewati. Lihat [api/README.md](api/README.md)      |
+| `npm run test:api`                         | Uji API (60 tes). Butuh `TEST_DB_URL` ke database uji; tanpa itu tes yang butuh database dilewati. Lihat [api/README.md](api/README.md)      |
 | `npx quasar build -m capacitor -T android` | Build Android (perlu toolchain di atas)                                                                                                      |
+
+Catatan uji: jangan menjalankan dua `quasar dev` dari folder proyek yang sama. Keduanya memakai `.quasar/` dan
+cache Vite (`node_modules/.q-cache`) bersama; salah satunya bisa menjawab 504 "Outdated Optimize Dep" atau
+menampilkan halaman kosong. Bila server dev Anda sedang berjalan, jalankan e2e terhadapnya (`BASE_URL`) atau dari
+salinan folder (dengan `node_modules` sendiri). `tests/e2e/real-api.mjs` juga bisa menguji build produksi di
+balik nginx (lihat komentar di kepala berkasnya).
+
+## Deploy produksi (aaPanel/Baota)
+
+Satu hostname (`jdih.dprd.singkawangkota.go.id`), nginx Baota di host: `/api/` ke container API,
+`/backend`, `/feed/`, `/common/dokumen/` tetap ke aplikasi lama (`ildis_app`), selain itu SPA statis
+(`dist/spa`) dengan fallback ke `index.html`. API sebagai container: bagian Docker di
+[api/README.md](api/README.md). Frontend, urutan peralihan bertahap, rollback, bentrok dengan URL lama,
+dan bukti pengujian: [docs/deploy/frontend-baota.md](docs/deploy/frontend-baota.md). Berkas konfigurasi:
+[deploy/baota-locations.conf](deploy/baota-locations.conf) (ditempel ke editor "Config" situs),
+[deploy/security-headers.conf](deploy/security-headers.conf), [deploy/nginx.conf](deploy/nginx.conf)
+(nginx di luar Baota), [deploy/docker-compose.yml](deploy/docker-compose.yml).
 
 ## Struktur
 
@@ -82,8 +99,8 @@ api/            API baca-saja (Node + Fastify + MySQL): src, db (skema, data uji
 dev/mock-api/   API palsu untuk pengembangan
 src-capacitor/  proyek Android (Capacitor 8)
 tests/          unit (Vitest) dan e2e (puppeteer-core + axe-core; real-api.mjs memakai API nyata)
-deploy/         contoh nginx dan header keamanan
-docs/           kontrak API (openapi.yaml) dan laporan audit keamanan
+deploy/         nginx (location Baota, vhost, header keamanan), docker-compose API (aaPanel/Baota), pembuat SQL akun DB
+docs/           kontrak API (openapi.yaml), panduan deploy frontend (docs/deploy), dan laporan audit keamanan
 design/         mockup yang disetujui, logo, dan DDL
 ```
 

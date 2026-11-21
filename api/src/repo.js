@@ -52,7 +52,7 @@ function filterSql(f) {
   }
   if (f.subyek) {
     where.push(
-      "EXISTS (SELECT 1 FROM data_subyek sb WHERE sb.id_dokumen = d.id AND sb.subyek LIKE ? ESCAPE '\\\\')"
+      "EXISTS (SELECT 1 FROM data_subyek sb WHERE sb.id_dokumen = d.id AND sb.subyek LIKE ? ESCAPE '|')"
     )
     p.push(`%${likeEscape(f.subyek)}%`)
   }
@@ -68,7 +68,7 @@ function filterSql(f) {
     } else {
       for (const word of f.q.split(/\s+/).filter(Boolean).slice(0, 6)) {
         where.push(
-          "CONCAT_WS(' ', d.jenis_peraturan, d.singkatan_jenis, d.nomor_peraturan, d.tahun_terbit, d.judul, d.teu) LIKE ? ESCAPE '\\\\'"
+          "CONCAT_WS(' ', d.jenis_peraturan, d.singkatan_jenis, d.nomor_peraturan, d.tahun_terbit, d.judul, d.teu) LIKE ? ESCAPE '|'"
         )
         p.push(`%${likeEscape(word)}%`)
       }

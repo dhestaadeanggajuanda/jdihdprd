@@ -1,0 +1,17 @@
+# Konteks build image API. Hanya package*.json dan src/ yang dibutuhkan.
+node_modules
+test
+db
+scripts
+*.md
+.env
+.env.*
+!.env.example
+*.sql
+*.log
+.git
+.gitignore
+.dockerignore
+Dockerfile
+coverage
+.nyc_output

@@ -1,7 +1,7 @@
 // Lampiran: jalur berkas SELALU berasal dari database di sisi server, tidak pernah
 // dari klien. Klien hanya memberi ID dokumen dan ID lampiran.
-import { createReadStream } from 'node:fs'
-import { realpath, stat } from 'node:fs/promises'
+import { constants } from 'node:fs'
+import { open, realpath } from 'node:fs/promises'
 import { join, sep } from 'node:path'
 
 const EXT_TYPE = Object.freeze({
@@ -76,7 +76,15 @@ export function resolveLampiran(urlLampiran, redirectHosts) {
   return name ? { kind: 'local', name } : null
 }
 
-/** Lampiran dibatasi bila kolom akses/pembatasan menyatakannya (aturan konservatif). */
+const OPEN_ACCESS = /^(terbuka|open|publik|public|umum|bebas)$/
+const NO_RESTRICTION = /^(tidak|tanpa|none|no|terbuka|open)\b/
+
+/**
+ * Lampiran dibatasi kecuali kedua kolom jelas menyatakan sebaliknya (gagal-tertutup).
+ * `akses_lampiran`: kosong atau "-" (tidak dinyatakan) atau nilai terbuka eksplisit; nilai
+ * lain, termasuk yang tidak dikenal ("hanya anggota", "login", "1", "tidak terbuka"), dibatasi.
+ * `pembatasan_lampiran`: kosong, "-", atau pernyataan "tanpa pembatasan"; isi lain = dibatasi.
+ */
 export function isRestricted(akses, pembatasan) {
   const a = String(akses ?? '')
     .trim()
@@ -84,24 +92,41 @@ export function isRestricted(akses, pembatasan) {
   const p = String(pembatasan ?? '')
     .trim()
     .toLowerCase()
-  if (/(tertutup|terbatas|privat|private|dibatasi|restricted|closed)/.test(a))
-    return true
-  if (p !== '' && p !== '-' && !/^(tidak|tanpa|none|no|terbuka|open)\b/.test(p))
-    return true
+  if (a !== '' && a !== '-' && !OPEN_ACCESS.test(a)) return true
+  if (p !== '' && p !== '-' && !NO_RESTRICTION.test(p)) return true
   return false
 }
 
-/** Membuka berkas lokal di dalam `dir` (mencegah keluar folder lewat symlink). */
+/**
+ * Membuka berkas lokal di dalam `dir` (mencegah keluar folder lewat symlink).
+ *
+ * Berkas DIBUKA di sini (bukan oleh createReadStream yang membuka belakangan), sehingga semua
+ * kegagalan membuka muncul sebelum respons dimulai dan penanganan galat tidak bercampur dengan
+ * header unduhan.
+ *  - tidak ada / bukan berkas biasa / di luar folder / symlink -> null (pemanggil menjawab 404)
+ *  - EACCES/EPERM (berkas ada tetapi proses tidak boleh membacanya: salah izin atau pemilik pada
+ *    volume) -> dilempar ulang: itu kesalahan konfigurasi server (500 dan tercatat di log), bukan
+ *    "tidak ditemukan".
+ */
 export async function openLocal(dir, name) {
   if (!dir || !safeFileName(name)) return null
+  let handle
   try {
     const root = await realpath(dir)
     const full = await realpath(join(root, name))
     if (!full.startsWith(root + sep)) return null
-    const info = await stat(full)
-    if (!info.isFile()) return null
-    return { stream: createReadStream(full), size: info.size }
-  } catch {
+    // O_NOFOLLOW: jalur sudah kanonik; bila komponen akhirnya berubah menjadi symlink di antara
+    // realpath dan open, pembukaan gagal (ELOOP) alih-alih mengikuti tautan keluar folder.
+    handle = await open(full, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0))
+    const info = await handle.stat()
+    if (!info.isFile()) {
+      await handle.close()
+      return null
+    }
+    return { stream: handle.createReadStream(), size: info.size }
+  } catch (err) {
+    await handle?.close().catch(() => {})
+    if (err?.code === 'EACCES' || err?.code === 'EPERM') throw err
     return null
   }
 }

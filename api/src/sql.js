@@ -2,7 +2,8 @@
 //
 // Konvensi data (dari skema dan data contoh JDIH; perlu diverifikasi dengan data nyata):
 //  - tipe_dokumen: 1 peraturan, 2 monografi, 3 artikel/majalah, 4 putusan
-//  - terbit di publik bila is_publish = 1 dan sembunyikan_di_opac bukan "Ya"/"1"
+//  - terbit di publik bila is_publish = 1 dan sembunyikan_di_opac kosong atau "Tidak"/"0"
+//    (daftar-izin: nilai tak dikenal = disembunyikan)
 //  - jenis = teks document.jenis_peraturan (kode = slug ASCII dari teks itu)
 //  - status keberlakuan hanya untuk peraturan; "dicabut" bila document.status menyatakan
 //    tidak berlaku ATAU ada relasi "dicabut" pada data_status
@@ -27,8 +28,11 @@ export const TIPE_NAMA = Object.freeze({
   4: 'Putusan'
 })
 
+// Gagal-tertutup: terbit hanya bila sembunyikan_di_opac kosong atau jelas berarti "tidak";
+// nilai lain (termasuk yang tidak dikenal, mis. "iya", "disembunyikan") dianggap disembunyikan.
+const NOT_HIDDEN = "('', '-', '0', 'n', 'no', 'tidak', 'tdk', 'false')"
 const publishedOf = a =>
-  `${a}.is_publish = 1 AND COALESCE(LOWER(TRIM(${a}.sembunyikan_di_opac)), '') NOT IN ('ya', '1', 'y', 'true') AND ${a}.tipe_dokumen IN (1, 2, 3, 4)`
+  `${a}.is_publish = 1 AND COALESCE(LOWER(TRIM(${a}.sembunyikan_di_opac)), '') IN ${NOT_HIDDEN} AND ${a}.tipe_dokumen IN (1, 2, 3, 4)`
 
 export const PUBLISHED = publishedOf('d')
 

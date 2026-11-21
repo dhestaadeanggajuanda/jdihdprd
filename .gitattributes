@@ -1,0 +1,6 @@
+# Skrip dan berkas build yang dijalankan di Linux harus berujung baris LF, walau repo
+# di-checkout di Windows (CRLF membuat `bash` gagal: "$'\r': command not found").
+*.sh text eol=lf
+Dockerfile text eol=lf
+# Konfigurasi nginx ditempel ke server Linux (editor Baota): hindari CR dari checkout Windows.
+*.conf text eol=lf

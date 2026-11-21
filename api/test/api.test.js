@@ -12,6 +12,7 @@ import mysql from 'mysql2/promise'
 import { loadConfig } from '../src/config.js'
 import { createDb } from '../src/db.js'
 import { buildServer } from '../src/server.js'
+import { PUBLISHED } from '../src/sql.js'
 
 const URL_ = process.env.TEST_DB_URL
 const skip = URL_ ? false : 'TEST_DB_URL tidak diisi'
@@ -112,6 +113,31 @@ describe('ringkasan dan daftar', { skip }, () => {
     assert.deepEqual(tgl, [...tgl].sort().reverse(), 'terbaru dulu')
   })
 
+  test('filter terbit gagal-tertutup: hanya kosong atau jelas "tidak" yang terbit', async () => {
+    const terbit = async nilai => {
+      const rows = await db.query(
+        `SELECT (${PUBLISHED}) AS ok FROM (SELECT 1 AS is_publish, 1 AS tipe_dokumen, ? AS sembunyikan_di_opac) d`,
+        [nilai]
+      )
+      return Number(rows[0].ok) === 1
+    }
+    for (const v of [null, '', ' ', '-', '0', 'Tidak', 'TIDAK', 'no', 'false'])
+      assert.equal(await terbit(v), true, `terbit: ${JSON.stringify(v)}`)
+    for (const v of [
+      'Ya',
+      '1',
+      'y',
+      'true',
+      'iya',
+      'Disembunyikan',
+      'hide',
+      'x',
+      '2',
+      'tidak ada'
+    ])
+      assert.equal(await terbit(v), false, `tersembunyi: ${JSON.stringify(v)}`)
+  })
+
   test('dokumen belum terbit atau disembunyikan tidak pernah muncul', async () => {
     const all = (
       await get('/dokumen?per_page=50&tipe=peraturan')
@@ -177,6 +203,42 @@ describe('ringkasan dan daftar', { skip }, () => {
       11,
       'tabel utuh setelah masukan injeksi'
     )
+  })
+
+  test('pencarian dan filter subyek tetap jalan dengan sql_mode NO_BACKSLASH_ESCAPES', async () => {
+    // Satu koneksi saja, supaya SET SESSION berlaku untuk semua kueri server ini. Server MySQL
+    // dengan my.cnf kustom (mis. di Baota) bisa memakai mode ini; `ESCAPE '\\'` gagal di sana.
+    const single = createDb(URL_, { connectionLimit: 1 })
+    const inst = await buildServer({
+      db: single,
+      cfg: loadConfig({ DB_URL: URL_, FILES_DIR: dir, RATE_LIMIT_MAX: '1000' })
+    })
+    try {
+      await inst.ready()
+      await single.query("SET SESSION sql_mode = 'NO_BACKSLASH_ESCAPES'")
+      const [{ m }] = await single.query('SELECT @@SESSION.sql_mode AS m')
+      assert.equal(
+        m,
+        'NO_BACKSLASH_ESCAPES',
+        'mode benar-benar aktif (bukan lulus kosong)'
+      )
+      const ids = async path =>
+        (await get(path, { a: inst })).json.data
+          .map(d => d.id)
+          .sort((a, b) => a - b)
+      assert.deepEqual(
+        await ids(`/dokumen?per_page=50&q=${encodeURIComponent('100%')}`),
+        ['17']
+      )
+      assert.deepEqual(
+        await ids(`/dokumen?per_page=50&q=${encodeURIComponent('_aman_')}`),
+        ['17']
+      )
+      assert.deepEqual(await ids('/dokumen?subyek=pasar'), ['2'])
+    } finally {
+      await inst.close()
+      await single.close()
+    }
   })
 
   test('urutan: nomor dan populer', async () => {
@@ -396,6 +458,39 @@ describe('lampiran', { skip }, () => {
       'https://bphn.jdihn.go.id/common/dokumen/perda5.pdf'
     )
     assert.equal((await get('/dokumen/7/lampiran/7')).status, 404)
+  })
+
+  test('galat unduhan tidak membawa header unduhan atau cache publik; sukses membawanya', async () => {
+    // Nama ada di database tetapi tidak ada di folder berkas: 404.
+    const hilang = await get('/dokumen/2/lampiran/3')
+    assert.equal(hilang.status, 404)
+    assert.equal(
+      hilang.headers['content-disposition'],
+      undefined,
+      'galat tidak boleh "attachment" (peramban menyimpan JSON galat sebagai berkas.pdf)'
+    )
+    assert.match(hilang.headers['content-type'], /^application\/problem\+json/)
+    assert.equal(hilang.headers['cache-control'], 'no-store')
+    // Galat lain: dibatasi, parameter salah, dokumen tidak ada.
+    for (const p of [
+      '/dokumen/6/lampiran/6',
+      '/dokumen/2/lampiran/abc',
+      '/dokumen/99999/lampiran/1'
+    ]) {
+      const r = await get(p)
+      assert.ok(r.status >= 400, p)
+      assert.equal(r.headers['cache-control'], 'no-store', p)
+      assert.equal(r.headers['content-disposition'], undefined, p)
+    }
+    // Sukses: tetap bisa di-cache dan berupa unduhan.
+    const ok = await get('/dokumen/2/lampiran/2')
+    assert.equal(ok.status, 200)
+    assert.equal(ok.headers['cache-control'], 'public, max-age=300')
+    assert.match(ok.headers['content-disposition'], /^attachment/)
+    assert.equal(
+      (await get('/ringkasan')).headers['cache-control'],
+      'public, max-age=60'
+    )
   })
 
   test('mode accel: nginx yang menyajikan berkas lewat X-Accel-Redirect', async () => {

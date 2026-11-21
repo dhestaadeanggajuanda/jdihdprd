@@ -1,0 +1,93 @@
+# API JDIH (baca-saja) sebagai container, untuk server aaPanel/Baota.
+# Salin deploy/.env.example menjadi deploy/.env (tidak di-commit), isi nilainya, lalu:
+#
+#   docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --build
+#
+# Yang TIDAK dikelola berkas ini (sudah ada di server): jaringan `baota_net`, container
+# `mysql_server` (compose MySQL jangan diubah), container `ildis_app`/`ildis_cron`, dan volume
+# dokumen. Nginx adalah nginx Baota di host (bukan container); lihat deploy/baota-locations.conf
+# dan docs/deploy/frontend-baota.md.
+#
+# Semua nilai lewat variabel ${...}; tidak ada rahasia di berkas ini. Variabel bertanda `:?`
+# WAJIB diisi: compose berhenti dengan pesan jelas bila kosong (gagal-tertutup).
+
+name: jdih
+
+services:
+  jdih_api:
+    build:
+      context: ../api
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:24-alpine}
+    image: jdih-api:${JDIH_API_TAG:-local}
+    container_name: jdih_api
+    restart: unless-stopped
+    init: true # tini: menangani sinyal dan membersihkan proses yatim
+    stop_grace_period: 15s
+
+    # Pengguna proses. Bawaan 1000:1000 (pengguna `node` di image). Berkas dokumen ditulis oleh
+    # ildis_app; pastikan terbaca oleh uid ini (atau isi API_UID/API_GID dengan pemilik/grup berkas).
+    user: '${API_UID:-1000}:${API_GID:-1000}'
+
+    environment:
+      HOST: 0.0.0.0 # di dalam container; yang membatasi akses adalah pemetaan port di bawah
+      PORT: '3000'
+
+      # Akun SELECT-only (api/db/grants.sql), host database = nama container MySQL di baota_net.
+      # Sandi: gunakan huruf/angka saja (mis. `openssl rand -hex 24`); karakter khusus harus
+      # di-percent-encode di URL dan `$` harus ditulis `$$` di berkas .env.
+      DB_URL: mysql://${DB_RO_USER:-jdih_ro}:${DB_RO_PASSWORD:?isi DB_RO_PASSWORD}@${DB_HOST:-mysql_server}:${DB_PORT:-3306}/${DB_NAME:?isi DB_NAME}
+
+      # Alamat proxy tepercaya = alamat yang TERLIHAT oleh API sebagai asal sambungan dari nginx
+      # host (gateway jaringan baota_net), bukan loopback. Daftar IP/CIDR; `true` dan angka
+      # ditolak saat start. Cara memastikan nilainya: deploy/.env.example.
+      TRUST_PROXY: ${TRUST_PROXY:?isi TRUST_PROXY dengan alamat gateway baota_net}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-120}
+
+      # Berkas dokumen dibaca Node dari volume read-only (nginx Baota biasanya tidak bisa membaca
+      # /var/lib/docker, jadi X-Accel-Redirect tidak dipakai).
+      FILES_MODE: stream
+      FILES_DIR: /data/dokumen${FILES_SUBDIR:+/}${FILES_SUBDIR:-}
+      # Kosong = tidak ada pengalihan ke host lain: lampiran berupa URL penuh tetap dibaca dari
+      # volume memakai nama berkasnya. Isi daftar host hanya bila ada lampiran yang memang di luar.
+      FILE_REDIRECT_HOSTS: ${FILE_REDIRECT_HOSTS:-}
+      PAGE_FILES_DIR: ${PAGE_FILES_DIR:-}
+
+    volumes:
+      - dokumen:/data/dokumen:ro
+
+    networks:
+      - baota_net
+
+    # Hanya ke loopback host: nginx Baota (di host) meneruskan /api/ ke sini. Tidak ke publik.
+    ports:
+      - '127.0.0.1:${API_PORT:-3000}:3000'
+
+    # Pengerasan container
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777,noexec,nosuid,nodev
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: ${API_PIDS_LIMIT:-128}
+    mem_limit: ${API_MEM_LIMIT:-384m}
+    cpus: ${API_CPUS:-1.0}
+
+    # Log ke stdout (pino); rotasi agar tidak memenuhi disk.
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  baota_net:
+    external: true
+    name: ${BAOTA_NETWORK:-baota_net}
+
+volumes:
+  dokumen:
+    external: true # dibuat oleh stack ildis_app; di sini hanya dipasang (read-only)
+    name: ${DOKUMEN_VOLUME:-jdihdprd_dokumen-uploads}

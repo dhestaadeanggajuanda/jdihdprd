@@ -200,14 +200,23 @@ export default async function routes(app, { db, cfg }) {
       const src = resolveLampiran(row.url_lampiran, cfg.fileRedirectHosts)
       if (!src) return reply.callNotFound()
 
-      reply.header('Cache-Control', 'public, max-age=300')
-      if (src.kind === 'redirect') return reply.redirect(src.url, 302)
+      if (src.kind === 'redirect') {
+        reply.header('Cache-Control', 'public, max-age=300')
+        return reply.redirect(src.url, 302)
+      }
 
-      reply.header('Content-Type', contentTypeOf(src.name))
-      reply.header('Content-Disposition', attachmentName(src.name))
-      reply.header('X-Content-Type-Options', 'nosniff')
+      // Header unduhan (attachment, cache) hanya boleh menempel pada respons berkas yang SUKSES.
+      // Bila diatur lebih dulu, galat 404/500 ikut membawanya: peramban menyimpan JSON galat
+      // sebagai "berkas.pdf" dan perantara bisa menyimpan galat itu sebagai respons publik.
+      const sendHeaders = () => {
+        reply.header('Cache-Control', 'public, max-age=300')
+        reply.header('Content-Type', contentTypeOf(src.name))
+        reply.header('Content-Disposition', attachmentName(src.name))
+        reply.header('X-Content-Type-Options', 'nosniff')
+      }
       if (cfg.filesMode === 'accel') {
         // nginx menyajikan berkas dari lokasi internal; Node tidak membaca byte berkas.
+        sendHeaders()
         reply.header(
           'X-Accel-Redirect',
           `${cfg.filesAccelPrefix}${encodeURIComponent(src.name)}`
@@ -216,6 +225,7 @@ export default async function routes(app, { db, cfg }) {
       }
       const file = await openLocal(cfg.filesDir, src.name)
       if (!file) return reply.callNotFound()
+      sendHeaders()
       reply.header('Content-Length', file.size)
       return reply.send(file.stream)
     }

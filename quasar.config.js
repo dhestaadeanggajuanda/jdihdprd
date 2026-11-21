@@ -18,7 +18,7 @@ const devApi = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d{1,5})?$/.test(
   : ''
 
 export default defineConfig(ctx => {
-  // Content-Security-Policy lewat <meta> (header penuh ada di deploy/nginx.conf).
+  // Content-Security-Policy lewat <meta> (header penuh ada di deploy/security-headers.conf).
   // Hanya dua origin yang boleh dihubungi: API JDIH dan Media Center.
   const connect = ["'self'", API_ORIGIN, MEDIACENTER_ORIGIN]
   if (ctx.dev) connect.push('ws://localhost:*', 'http://localhost:*')

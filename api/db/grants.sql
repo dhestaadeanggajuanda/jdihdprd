@@ -2,8 +2,16 @@
 -- Tidak ada akses ke tabel akun/anggota/log (user, member, auth_*, visitor_log, dll).
 -- Ganti {{DB}}, {{USER}}, {{HOST}}, dan {{PASSWORD}} (dibuat oleh pengelola database;
 -- jangan simpan sandi di repo). scripts/load-db.mjs --grants merender templat ini untuk uji.
+--
+-- PRODUKSI (aaPanel/Baota, MySQL di container mysql_server): render dengan deploy/render-grants.sh
+-- lalu alirkan ke `docker exec -i -e MYSQL_PWD mysql_server mysql -uroot` (lihat api/README.md,
+-- bagian Docker). {{HOST}} = subnet jaringan baota_net, mis. '172.19.%' (bukan '%'). scripts/load-db.mjs
+-- tidak boleh dipakai di produksi.
 
 CREATE USER IF NOT EXISTS '{{USER}}'@'{{HOST}}' IDENTIFIED BY '{{PASSWORD}}';
+-- Akun yang sudah ada tidak diubah oleh CREATE USER IF NOT EXISTS; ALTER USER memastikan
+-- sandi akhirnya sama dengan yang diberikan (idempoten, aman dijalankan ulang).
+ALTER USER '{{USER}}'@'{{HOST}}' IDENTIFIED BY '{{PASSWORD}}';
 
 GRANT SELECT ON `{{DB}}`.`document`          TO '{{USER}}'@'{{HOST}}';
 GRANT SELECT ON `{{DB}}`.`data_lampiran`     TO '{{USER}}'@'{{HOST}}';

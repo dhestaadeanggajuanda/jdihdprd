@@ -100,8 +100,11 @@ export function stripSubjectPrefix(judul) {
   return m ? m[1].trim() : judul
 }
 
-// Karakter khusus LIKE di-escape agar masukan pengguna tidak menjadi pola.
-export const likeEscape = s => String(s).replace(/[\\%_]/g, m => `\\${m}`)
+// Karakter khusus LIKE di-escape agar masukan pengguna tidak menjadi pola. Karakter escape
+// SENGAJA "|", bukan backslash: dengan sql_mode NO_BACKSLASH_ESCAPES, `ESCAPE '\\'` berupa dua
+// karakter dan kueri gagal (500). Pasangannya: `ESCAPE '|'` di repo.js.
+export const LIKE_ESCAPE_CHAR = '|'
+export const likeEscape = s => String(s).replace(/[|%_]/g, m => `|${m}`)
 
 export function parseIdList(value) {
   return [

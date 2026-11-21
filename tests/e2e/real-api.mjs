@@ -2,6 +2,14 @@
 //   1) API:   DB_URL=... API_SAMPLE=1 node api/src/index.js
 //   2) Klien: DEV_API=http://127.0.0.1:3000 npx quasar dev --port 9005
 //   3) BASE_URL=http://localhost:9005 node tests/e2e/real-api.mjs
+//
+// Terhadap BUILD PRODUKSI di balik nginx (docs/deploy/frontend-baota.md, bagian Pengujian): bundel
+// menanam https://jdih.dprd.singkawangkota.go.id sebagai origin API, jadi Chrome uji memetakan host
+// itu ke nginx uji dan menerima sertifikat uji, tanpa menyentuh situs produksi:
+//   CHROME_ARGS='["--host-resolver-rules=MAP jdih.dprd.singkawangkota.go.id 127.0.0.1:18443","--ignore-certificate-errors"]'
+//   BASE_URL=https://jdih.dprd.singkawangkota.go.id node tests/e2e/real-api.mjs
+// Bila halaman dibuka dari origin lain (origin sementara), tambahkan host API ke daftar host yang
+// diizinkan: EXTRA_ALLOWED_HOSTS=jdih.dprd.singkawangkota.go.id
 import puppeteer from 'puppeteer-core'
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -10,13 +18,15 @@ const BASE = process.env.BASE_URL ?? 'http://localhost:9005'
 const CHROME =
   process.env.CHROME_PATH ??
   'C:/Program Files/Google/Chrome/Application/chrome.exe'
+const CHROME_ARGS = JSON.parse(process.env.CHROME_ARGS ?? '[]')
 const axeSource = readFileSync(
   createRequire(import.meta.url).resolve('axe-core/axe.min.js'),
   'utf8'
 )
 const ALLOWED = new Set([
   new URL(BASE).host,
-  'mediacenter.singkawangkota.go.id'
+  'mediacenter.singkawangkota.go.id',
+  ...(process.env.EXTRA_ALLOWED_HOSTS ?? '').split(',').filter(Boolean)
 ])
 const results = []
 const check = (cond, name, detail = '') =>
@@ -25,7 +35,7 @@ const check = (cond, name, detail = '') =>
 const browser = await puppeteer.launch({
   executablePath: CHROME,
   headless: 'new',
-  args: ['--no-sandbox']
+  args: ['--no-sandbox', ...CHROME_ARGS]
 })
 
 async function open(path, vp = { width: 1280, height: 800 }) {
@@ -168,13 +178,36 @@ try {
       const href = await page.$eval('.actions a.btn-primary', a =>
         a.getAttribute('href')
       )
-      const res = await fetch(BASE + href)
+      // Server dev (Vite) menjawab 204 untuk fetch `Accept: */*` dari dalam halaman, jadi pada dev
+      // (tautan relatif di host lokal) tetap memakai fetch Node. Terhadap build produksi di balik nginx,
+      // diambil DARI DALAM halaman: fetch Node tidak ikut pemetaan host Chrome dan akan menyentuh
+      // situs produksi sungguhan.
+      const viaNode =
+        href.startsWith('/') &&
+        ['localhost', '127.0.0.1'].includes(new URL(BASE).hostname)
+      const res = viaNode
+        ? await fetch(BASE + href).then(r => ({
+            status: r.status,
+            type: r.headers.get('content-type'),
+            cd: r.headers.get('content-disposition') ?? ''
+          }))
+        : await page.evaluate(async h => {
+            const r = await fetch(h)
+            return {
+              status: r.status,
+              type: r.headers.get('content-type'),
+              cd: r.headers.get('content-disposition') ?? ''
+            }
+          }, href)
+      // Lintas-origin (origin sementara), JavaScript tidak boleh membaca Content-Disposition
+      // (bukan header yang diekspos CORS); tautan unduh biasa tetap menerimanya.
+      const lintasOrigin = new URL(href, BASE).origin !== new URL(BASE).origin
       check(
         res.status === 200 &&
-          res.headers.get('content-type') === 'application/pdf' &&
-          /attachment/.test(res.headers.get('content-disposition') ?? ''),
-        'detail: unduhan berkas dilayani PDF attachment',
-        `${res.status} ${res.headers.get('content-type')}`
+          res.type === 'application/pdf' &&
+          (lintasOrigin || /attachment/.test(res.cd)),
+        `detail: unduhan berkas dilayani PDF${lintasOrigin ? ' (lintas-origin: header unduhan tidak terbaca JS)' : ' attachment'}`,
+        `${res.status} ${res.type}`
       )
     }
     if (name === 'tentang-struktur') {

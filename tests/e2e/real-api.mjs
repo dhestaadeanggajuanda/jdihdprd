@@ -124,8 +124,8 @@ try {
     ['dokumen', '/dokumen', undefined],
     ['detail', '/dokumen/2', undefined],
     ['statistik', '/statistik', undefined],
-    ['tentang-struktur', '/tentang/jdih-instansi', undefined],
-    ['tentang-html', '/tentang/dasar-hukum', undefined],
+    ['profil-struktur', '/profil/jdih-instansi', undefined],
+    ['profil-html', '/profil/dasar-hukum', undefined],
     ['puu', '/pembentukan-puu/naskah-akademik', undefined]
   ]) {
     const page = await open(path, vp)
@@ -210,20 +210,20 @@ try {
         `${res.status} ${res.type}`
       )
     }
-    if (name === 'tentang-struktur') {
+    if (name === 'profil-struktur') {
       const ok = await page
         .$eval('.page-figure img', i => i.complete && i.naturalWidth > 0)
         .catch(() => false)
-      check(ok, 'tentang: gambar struktur organisasi dimuat dari API')
+      check(ok, 'profil: gambar struktur organisasi dimuat dari API')
     }
-    if (name === 'tentang-html') {
+    if (name === 'profil-html') {
       const bahaya = await page.$eval('.safe-html', el => ({
         s: el.querySelectorAll('script,img,iframe').length,
         x: window.__xss
       }))
       check(
         bahaya.s === 0 && !bahaya.x,
-        'tentang: HTML dari DB dibersihkan (script dan onerror tidak jalan)'
+        'profil: HTML dari DB dibersihkan (script dan onerror tidak jalan)'
       )
     }
     if (name === 'statistik') {

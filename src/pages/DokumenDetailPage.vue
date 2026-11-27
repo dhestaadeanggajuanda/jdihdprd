@@ -76,6 +76,13 @@
           >
         </div>
 
+        <PdfPreview
+          v-if="d.lampiran.length > 0"
+          :lampiran="d.lampiran"
+          :judul="judulPendek(d)"
+          :alamat="unduh"
+        />
+
         <div v-if="kutipan" class="cite">
           <p><span class="lbl">Cara mengutip</span>{{ kutipan }}</p>
           <button
@@ -230,11 +237,14 @@ import { useMeta } from 'quasar'
 import AppIcon from '@/components/AppIcon.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import NavLink from '@/components/NavLink.vue'
+import PdfPreview from '@/components/PdfPreview.vue'
 import SkeletonCards from '@/components/SkeletonCards.vue'
 import StatusBadges from '@/components/StatusBadges.vue'
 import { getDokumen, lampiranUrl } from '@/services/api.js'
 import { useResource } from '@/composables/useResource.js'
 import { useToast } from '@/composables/useToast.js'
+import { useWhatsappPesan } from '@/composables/useFabContext.js'
+import { pesanDokumen } from '@/utils/whatsapp.js'
 import { judulLengkap, judulNomor, judulPendek } from '@/utils/dokumen.js'
 import { formatBytes, formatDate, formatNumber } from '@/utils/format.js'
 import { copyText, shareLink } from '@/utils/share.js'
@@ -259,6 +269,16 @@ const { data, error, loading, reload } = useResource(
 const d = computed(() => data.value)
 
 useMeta(() => ({ title: d.value ? judulPendek(d.value) : 'Detail dokumen' }))
+
+// Pesan awal tombol WhatsApp di halaman ini: judul dan tautan dokumen.
+useWhatsappPesan(() =>
+  d.value
+    ? pesanDokumen(
+        judulLengkap(d.value),
+        `${window.location.origin}${route.path}`
+      )
+    : ''
+)
 
 const bernomor = computed(() => Boolean(d.value?.nomor && d.value?.tahun))
 const heading = computed(() =>

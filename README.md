@@ -39,12 +39,15 @@ DEV_API=http://localhost:3000 npm run dev      # PowerShell: $env:DEV_API='http:
 
 ## Variabel `.env`
 
-Dua variabel klien, keduanya berawalan `JDIH_`:
+Variabel klien, semuanya berawalan `JDIH_` (daftar lengkap dengan aturannya di [.env.example](.env.example)):
 
-| Variabel              | Fungsi                                                                                                                                                                                                                                     |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JDIH_NEWS_FILTER`    | Kata kunci (dipisah koma) untuk berita dari `mediacenter.singkawangkota.go.id`. Tiap kata kunci dicari sebagai frasa utuh, hasilnya digabung tanpa duplikat dan diurutkan dari yang terbaru. Bawaan: `produk hukum,peraturan daerah,dprd`. |
-| `JDIH_FOOTER_CONTACT` | Alamat dan kontak di footer, baris dipisah `\|`. Surel dan telepon yang berdiri sendiri menjadi tautan `mailto:`/`tel:`. Kosong = kolom Kontak tidak ditampilkan.                                                                          |
+| Variabel                                                         | Fungsi                                                                                                                                                                                                                                     |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JDIH_WHATSAPP`                                                  | Nomor WhatsApp resmi untuk tombol kanan bawah (tautan `https://wa.me/<nomor>`, tanpa skrip). Kosong = tombol tidak ditampilkan.                                                                                                            |
+| `JDIH_ASISTEN_URL`                                               | Jalur layanan Asisten JDIH pada origin yang sama, mis. `/asisten/chat`. **Kosong (bawaan) = tombol Asisten, panelnya, dan butirnya di Kebijakan Privasi tidak dirender.** Layanannya tidak ada di repo ini; hanya web.                     |
+| `JDIH_KEBIJAKAN_*`, `JDIH_ASISTEN_LOKASI`, `JDIH_ASISTEN_SIMPAN` | Isian naskah Kebijakan Privasi dan Cookie yang hanya diketahui instansi (tanggal berlaku, kontak, masa simpan log, lokasi pemrosesan Asisten). Kosong = penanda `[diisi instansi]` dan label "Naskah contoh".                              |
+| `JDIH_NEWS_FILTER`                                               | Kata kunci (dipisah koma) untuk berita dari `mediacenter.singkawangkota.go.id`. Tiap kata kunci dicari sebagai frasa utuh, hasilnya digabung tanpa duplikat dan diurutkan dari yang terbaru. Bawaan: `produk hukum,peraturan daerah,dprd`. |
+| `JDIH_FOOTER_CONTACT`                                            | Alamat dan kontak di footer, baris dipisah `\|`. Surel dan telepon yang berdiri sendiri menjadi tautan `mailto:`/`tel:`. Kosong = kolom Kontak tidak ditampilkan.                                                                          |
 
 ```
 JDIH_NEWS_FILTER=produk hukum,peraturan daerah,dprd
@@ -55,16 +58,17 @@ Nilai ditanam ke bundel saat build, jadi **publik** (jangan isi rahasia). Mengga
 
 ## Perintah
 
-| Perintah                                   | Fungsi                                                                                                                                       |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`                              | Server pengembangan + API palsu                                                                                                              |
-| `npm run build`                            | Build SPA produksi ke `dist/spa` (mode riwayat, perlu fallback ke `index.html`)                                                              |
-| `npm run check`                            | Format, lint, gerbang keamanan statis, dan uji unit                                                                                          |
-| `npm test`                                 | Uji unit (Vitest)                                                                                                                            |
-| `npm run lint:security`                    | Gerbang keamanan statis (`scripts/check-security.mjs`)                                                                                       |
-| `npm run test:e2e`                         | Uji peramban sungguhan: alur, axe WCAG 2.2 AA, CSP, XSS, galat, offline. Jalankan `npm run dev` lebih dulu (`BASE_URL` bila port bukan 9000) |
-| `npm run test:api`                         | Uji API (60 tes). Butuh `TEST_DB_URL` ke database uji; tanpa itu tes yang butuh database dilewati. Lihat [api/README.md](api/README.md)      |
-| `npx quasar build -m capacitor -T android` | Build Android (perlu toolchain di atas)                                                                                                      |
+| Perintah                                   | Fungsi                                                                                                                                                                                                                                                                                |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                              | Server pengembangan + API palsu                                                                                                                                                                                                                                                       |
+| `npm run build`                            | Build SPA produksi ke `dist/spa` (mode riwayat, perlu fallback ke `index.html`)                                                                                                                                                                                                       |
+| `npm run check`                            | Format, lint, gerbang keamanan statis, dan uji unit                                                                                                                                                                                                                                   |
+| `npm test`                                 | Uji unit (Vitest)                                                                                                                                                                                                                                                                     |
+| `npm run lint:security`                    | Gerbang keamanan statis (`scripts/check-security.mjs`)                                                                                                                                                                                                                                |
+| `npm run test:e2e`                         | Uji peramban sungguhan: alur, axe WCAG 2.2 AA, CSP, XSS, galat, offline. Jalankan `npm run dev` lebih dulu (`BASE_URL` bila port bukan 9000)                                                                                                                                          |
+| `npm run test:e2e:fitur`                   | Uji peramban fitur Profil/kebijakan, widget aksesibilitas, tombol WhatsApp/Asisten, pratinjau PDF. Jalankan `npm run dev` dengan `JDIH_WHATSAPP` dan `JDIH_ASISTEN_URL=/asisten/chat`, lalu beri `FITUR_WHATSAPP` dan `FITUR_ASISTEN=1` (kepala berkasnya menjelaskan keadaan kosong) |
+| `npm run test:api`                         | Uji API (60 tes). Butuh `TEST_DB_URL` ke database uji; tanpa itu tes yang butuh database dilewati. Lihat [api/README.md](api/README.md)                                                                                                                                               |
+| `npx quasar build -m capacitor -T android` | Build Android (perlu toolchain di atas)                                                                                                                                                                                                                                               |
 
 Catatan uji: jangan menjalankan dua `quasar dev` dari folder proyek yang sama. Keduanya memakai `.quasar/` dan
 cache Vite (`node_modules/.q-cache`) bersama; salah satunya bisa menjawab 504 "Outdated Optimize Dep" atau
@@ -87,13 +91,16 @@ dan bukti pengujian: [docs/deploy/frontend-baota.md](docs/deploy/frontend-baota.
 
 ```
 src/
-  config/       hosts.js (konstanta host), endpoints.js, env.js (JDIH_NEWS_FILTER, JDIH_FOOTER_CONTACT)
-  services/     http.js (klien HTTP tunggal), api.js, normalizers.js, news.js, notifications.js
+  config/       hosts.js (konstanta host), endpoints.js, env.js (variabel JDIH_*), fitur.js (fitur opsional), aksesibilitas.js
+  services/     http.js (klien HTTP tunggal: getJson, postJson untuk Asisten, getBytes untuk PDF), api.js, normalizers.js,
+                news.js, notifications.js, asisten.js, pdf.js (pdf.js dimuat malas), dataTersimpan.js
   utils/        schema, validators, url (allowlist), sanitize (DOMPurify), text, format, errors, storage
-  composables/  useResource, useAppearance, useToast, useOnline, useBarTitle
+  composables/  useResource, useAppearance (tema, ukuran teks, pilihan aksesibilitas), useA11yPanel, useAsisten, usePdfPreview,
+                useToast, useOnline, useBarTitle, useProfilDaftar, useFabContext, useMedia
   components/   AppHeader/AppNav/AppFooter, HeroSlider, SearchCard, DocCard, PostCard, FilterForm/FilterSheet,
-                StateView/ErrorState/SkeletonCards, charts/*, SafeHtml, AppIcon (ikon SVG inline)
-  pages/        Beranda, Dokumen, Detail, Berita, Statistik, Tentang, Info, PUU, 404
+                StateView/ErrorState/SkeletonCards, charts/*, SafeHtml, AppIcon (ikon SVG inline), ProfilNav, PolicyLayout,
+                A11yWidget, FloatingActions/AsistenPanel, PdfPreview/PdfViewer/PdfMessage
+  pages/        Beranda, Dokumen, Detail, Berita, Statistik, Profil, Info (hub Profil), Kebijakan Privasi/Cookie, PUU, 404
   css/app.scss  token dan komponen (dari mockup yang disetujui)
 api/            API baca-saja (Node + Fastify + MySQL): src, db (skema, data uji, hak akses), scripts, test
 dev/mock-api/   API palsu untuk pengembangan

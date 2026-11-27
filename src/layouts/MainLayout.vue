@@ -10,6 +10,8 @@
   </main>
   <AppFooter />
   <AppNav />
+  <A11yWidget />
+  <FloatingActions />
   <AppToast />
 </template>
 
@@ -17,10 +19,12 @@
 import { nextTick, onBeforeUnmount, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMeta } from 'quasar'
+import A11yWidget from '@/components/A11yWidget.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import AppNav from '@/components/AppNav.vue'
 import AppFooter from '@/components/AppFooter.vue'
 import AppToast from '@/components/AppToast.vue'
+import FloatingActions from '@/components/FloatingActions.vue'
 import OfflineBanner from '@/components/OfflineBanner.vue'
 import SampleNotice from '@/components/SampleNotice.vue'
 

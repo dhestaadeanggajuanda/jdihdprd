@@ -21,3 +21,12 @@ export function writeJson(key, value) {
     return false
   }
 }
+
+export function removeKey(key) {
+  try {
+    globalThis.localStorage?.removeItem(PREFIX + key)
+    return true
+  } catch {
+    return false
+  }
+}

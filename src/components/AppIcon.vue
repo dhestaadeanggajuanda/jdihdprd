@@ -1,6 +1,11 @@
 <template>
   <svg
-    :class="['i', size ? `i-${size}` : '', flip ? 'flip' : '']"
+    :class="[
+      'i',
+      size ? `i-${size}` : '',
+      flip ? 'flip' : '',
+      fill ? 'i-fill' : ''
+    ]"
     viewBox="0 0 24 24"
     aria-hidden="true"
     focusable="false"
@@ -22,7 +27,9 @@ const props = defineProps({
   name: { type: String, required: true },
   // '' (24px), 'sm' (18px), 'xs' (16px)
   size: { type: String, default: '' },
-  flip: { type: Boolean, default: false }
+  flip: { type: Boolean, default: false },
+  // Ikon merek berupa bentuk terisi (mis. WhatsApp), bukan garis.
+  fill: { type: Boolean, default: false }
 })
 
 const shapes = computed(() => ICONS[props.name] ?? [])

@@ -40,7 +40,7 @@ const check = (cond, name, detail = '') =>
 const browser = await puppeteer.launch({
   executablePath: CHROME,
   headless: 'new',
-  args: ['--no-sandbox']
+  args: ['--no-sandbox', ...JSON.parse(process.env.CHROME_ARGS ?? '[]')]
 })
 
 async function openPage(viewport, { scheme = 'light' } = {}) {
@@ -163,7 +163,9 @@ try {
     ['detail', `/dokumen/${DOC_ID}`],
     ['berita', '/berita'],
     ['statistik', '/statistik'],
-    ['tentang', '/tentang/dasar-hukum'],
+    ['profil', '/profil/dasar-hukum'],
+    ['kebijakan-privasi', '/kebijakan-privasi'],
+    ['kebijakan-cookie', '/kebijakan-cookie'],
     ['info', '/info'],
     ['puu', '/pembentukan-puu'],
     ['404', '/halaman-tidak-ada']
@@ -176,7 +178,13 @@ try {
       for (const [name, path] of ROUTES) {
         if (
           scheme === 'dark' &&
-          !['beranda', 'detail', 'statistik', 'info'].includes(name)
+          ![
+            'beranda',
+            'detail',
+            'statistik',
+            'info',
+            'kebijakan-privasi'
+          ].includes(name)
         )
           continue
         const page = await openPage(vp, { scheme })
@@ -278,8 +286,11 @@ try {
     const href = await page.$eval('.actions a.btn-primary', a =>
       a.getAttribute('href')
     )
+    // Dev: jalur relatif; build produksi: alamat penuh ke API. Yang dinilai jalurnya.
     check(
-      new RegExp(`^/api/v1/dokumen/${DOC_ID}/lampiran/f${DOC_ID}$`).test(href),
+      new RegExp(`^/api/v1/dokumen/${DOC_ID}/lampiran/f${DOC_ID}$`).test(
+        new URL(href, BASE).pathname
+      ),
       'detail: tautan unduh memakai ID buram',
       href
     )
@@ -561,7 +572,7 @@ try {
   // ---------- Keamanan: halaman uji sanitasi dan 404 ----------
   await section(async () => {
     const page = await openPage(DESKTOP)
-    await go(page, '/tentang/uji-sanitasi')
+    await go(page, '/profil/uji-sanitasi')
     await page.waitForSelector('.safe-html', { timeout: 8000 })
     const danger = await page.$eval('.safe-html', el => ({
       script: el.querySelectorAll('script,iframe,svg,img,object,embed,form')

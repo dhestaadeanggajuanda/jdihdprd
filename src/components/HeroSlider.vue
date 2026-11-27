@@ -99,8 +99,16 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+  watchEffect
+} from 'vue'
 import { getReferensi } from '@/services/api.js'
+import { useAppearance } from '@/composables/useAppearance.js'
 import { useResource } from '@/composables/useResource.js'
 import AppIcon from './AppIcon.vue'
 import NavLink from './NavLink.vue'
@@ -142,9 +150,19 @@ const SHORTCUTS = computed(() => [
 const INTERVAL_MS = 6000
 
 const index = ref(0)
-// Gerak dikurangi: tidak berganti sendiri, pengguna bisa memutarnya manual (WCAG 2.2.2).
+// Gerak dikurangi (pengaturan sistem atau "Hentikan animasi" di aksesibilitas):
+// tidak berganti sendiri, pengguna bisa memutarnya manual (WCAG 2.2.2).
+const { a11y } = useAppearance()
 const paused = ref(
-  globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+  a11y.motion ||
+    (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ??
+      false)
+)
+watch(
+  () => a11y.motion,
+  value => {
+    if (value) paused.value = true
+  }
 )
 // Pergantian berhenti sementara saat kursor atau fokus ada di hero.
 const hover = ref(false)

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { getJson, buildUrl, HttpError } from '@/services/http.js'
+import { getJson, postJson, buildUrl, HttpError } from '@/services/http.js'
 
 const ORIGIN = 'https://api.contoh.test'
 const OPTS = { allowedOrigins: [ORIGIN] }
@@ -175,5 +175,75 @@ describe('getJson', () => {
     const p = getJson(`${ORIGIN}/x`, { ...OPTS, signal: ctl.signal })
     ctl.abort()
     await expect(p).rejects.toMatchObject({ kind: 'aborted' })
+  })
+})
+
+describe('postJson (hanya untuk Asisten)', () => {
+  const POST_OPTS = { allowedOrigins: [ORIGIN] }
+
+  it('mengirim POST JSON dengan kontrol yang sama: tanpa kredensial, tanpa redirect, tanpa cache', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(response({ answer: 'x' }))
+    vi.stubGlobal('fetch', fetchMock)
+    const { data } = await postJson(
+      `${ORIGIN}/x`,
+      { question: 'abc' },
+      POST_OPTS
+    )
+    expect(data).toEqual({ answer: 'x' })
+    const init = fetchMock.mock.calls[0][1]
+    expect(init.method).toBe('POST')
+    expect(JSON.parse(init.body)).toEqual({ question: 'abc' })
+    expect(init.headers['Content-Type']).toBe('application/json')
+    expect(init.credentials).toBe('omit')
+    expect(init.referrerPolicy).toBe('no-referrer')
+    expect(init.redirect).toBe('error')
+    expect(init.cache).toBe('no-store')
+  })
+
+  it('GET tidak membawa body dan tetap mengikuti pengalihan yang diizinkan', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(response({}))
+    vi.stubGlobal('fetch', fetchMock)
+    await getJson(`${ORIGIN}/x`, OPTS)
+    const init = fetchMock.mock.calls[0][1]
+    expect(init).not.toHaveProperty('body')
+    expect(init.redirect).toBe('follow')
+    expect(init.headers).toEqual({ Accept: 'application/json' })
+  })
+
+  it('memblokir origin di luar allowlist dan memakai origin halaman secara bawaan', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(response({}))
+    vi.stubGlobal('fetch', fetchMock)
+    await expect(
+      postJson('https://evil.test/x', {}, POST_OPTS)
+    ).rejects.toMatchObject({ kind: 'blocked' })
+    expect(fetchMock).not.toHaveBeenCalled()
+    // Tanpa allowedOrigins: hanya origin halaman (jsdom).
+    await expect(postJson('https://evil.test/x', {})).rejects.toMatchObject({
+      kind: 'blocked'
+    })
+    fetchMock.mockResolvedValue(
+      response({}, { url: `${globalThis.location.origin}/asisten/chat` })
+    )
+    await expect(
+      postJson('/asisten/chat', { question: 'abc' })
+    ).resolves.toBeDefined()
+  })
+
+  it('status galat menjadi HttpError dan pengalihan oleh peramban menjadi kegagalan jaringan', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(response({}, { status: 429 }))
+    )
+    await expect(postJson(`${ORIGIN}/x`, {}, POST_OPTS)).rejects.toMatchObject({
+      kind: 'http',
+      status: 429
+    })
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValue(new TypeError('redirect mode is set to error'))
+    )
+    await expect(postJson(`${ORIGIN}/x`, {}, POST_OPTS)).rejects.toMatchObject({
+      kind: 'network'
+    })
   })
 })

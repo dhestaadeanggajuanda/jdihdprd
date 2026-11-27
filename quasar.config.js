@@ -5,6 +5,7 @@ import { defineConfig } from '#q-app'
 import { readFileSync } from 'node:fs'
 import { API_ORIGIN, MEDIACENTER_ORIGIN } from './src/config/hosts.js'
 import { mockApiPlugin } from './dev/mock-api/plugin.js'
+import { PDFJS_DIR, pdfjsAssetsPlugin } from './dev/pdfjs-assets-plugin.js'
 
 const pkg = JSON.parse(
   readFileSync(new URL('./package.json', import.meta.url), 'utf8')
@@ -51,7 +52,7 @@ export default defineConfig(ctx => {
 
       // Hanya variabel berawalan JDIH_ yang sampai ke klien.
       env: { clientPrefix: 'JDIH_' },
-      defineEnv: { JDIH_APP_VERSION: pkg.version },
+      defineEnv: { JDIH_APP_VERSION: pkg.version, JDIH_PDFJS_DIR: PDFJS_DIR },
 
       // Peta sumber tidak dipublikasikan.
       sourcemap: false,
@@ -59,6 +60,8 @@ export default defineConfig(ctx => {
       extendViteConf(viteConf) {
         // API palsu, kecuali pengembang menunjuk API nyata: DEV_API=http://localhost:3000 npm run dev
         if (ctx.dev && !devApi) viteConf.plugins.push(mockApiPlugin())
+        // Dekoder JBIG2/JPEG 2000 versi JavaScript untuk pratinjau PDF (satu origin).
+        viteConf.plugins.push(pdfjsAssetsPlugin())
       }
     },
 

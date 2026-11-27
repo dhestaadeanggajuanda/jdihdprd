@@ -1,32 +1,51 @@
 <template>
   <div class="wrap narrow">
     <div class="pagehead vh-compact">
-      <h1>Info</h1>
-      <p>Tentang JDIH, tampilan, notifikasi, dan tautan terkait.</p>
+      <h1>Profil</h1>
+      <p
+        >Profil instansi, kebijakan, notifikasi, tampilan, dan tautan
+        terkait.</p
+      >
     </div>
 
-    <section aria-labelledby="h-tentang">
-      <h2 id="h-tentang" class="group-h">Tentang kami</h2>
+    <section aria-labelledby="h-profil">
+      <h2 id="h-profil" class="group-h">Profil instansi</h2>
       <div class="menu-list">
         <ErrorState
-          v-if="listError && !daftar"
+          v-if="listError && !daftarData"
           :error="listError"
           @retry="reloadList"
         />
         <template v-else>
           <NavLink
-            v-for="p in daftar ?? []"
+            v-for="p in daftar"
             :key="p.slug"
             class="srow"
-            :to="`/tentang/${p.slug}`"
+            :to="`/profil/${p.slug}`"
           >
             <p>{{ p.grup ? `${p.grup}: ${p.judul}` : p.judul }}</p>
             <AppIcon name="chevron-right" />
           </NavLink>
-          <div v-if="!daftar" class="srow" aria-hidden="true"
+          <div v-if="!daftarData" class="srow" aria-hidden="true"
             ><span class="shimmer srow-sk"
           /></div>
         </template>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-kebijakan">
+      <h2 id="h-kebijakan" class="group-h">Kebijakan</h2>
+      <div class="menu-list">
+        <NavLink class="srow" to="/kebijakan-privasi">
+          <span class="lead-i"><AppIcon name="shield" /></span>
+          <p>Privasi<small>Data yang diproses dan hak Anda</small></p>
+          <AppIcon name="chevron-right" />
+        </NavLink>
+        <NavLink class="srow" to="/kebijakan-cookie">
+          <span class="lead-i"><AppIcon name="cookie" /></span>
+          <p>Cookie<small>Yang disimpan di perangkat Anda</small></p>
+          <AppIcon name="chevron-right" />
+        </NavLink>
       </div>
     </section>
 
@@ -67,14 +86,17 @@
       </div>
     </section>
 
-    <section aria-labelledby="h-tampil">
+    <section id="tampilan" aria-labelledby="h-tampil">
       <h2 id="h-tampil" class="group-h">Tampilan</h2>
       <div class="menu-list">
-        <div class="srow">
+        <!-- Di web, baris di bawah 1024 px; dari 1024 px pilihan yang sama ada di
+             panel aksesibilitas (satu baris pembuka). Di Android tema dan ukuran
+             teks selalu tampil di sini dan tidak ada pilihan aksesibilitas. -->
+        <div class="srow" :class="{ 'below-lg': !native }">
           <span class="lead-i"><AppIcon name="moon" /></span>
           <p>Tema<small>Ikuti sistem, terang, atau gelap</small></p>
         </div>
-        <div class="srow">
+        <div class="srow" :class="{ 'below-lg': !native }">
           <div class="seg seg-full" role="group" aria-label="Tema">
             <button
               v-for="t in TEMA"
@@ -86,7 +108,7 @@
             >
           </div>
         </div>
-        <div class="srow">
+        <div class="srow" :class="{ 'below-lg': !native }">
           <span class="lead-i"><AppIcon name="type" /></span>
           <p
             >Ukuran teks<small
@@ -94,10 +116,10 @@
             ></p
           >
         </div>
-        <div class="srow">
+        <div class="srow" :class="{ 'below-lg': !native }">
           <div class="seg seg-full" role="group" aria-label="Ukuran teks">
             <button
-              v-for="t in UKURAN"
+              v-for="t in UKURAN_TEKS"
               :key="t.value"
               type="button"
               :aria-pressed="tampilan.text === t.value"
@@ -106,6 +128,57 @@
             >
           </div>
         </div>
+
+        <template v-if="!native">
+          <div class="srow below-lg">
+            <span class="lead-i"><AppIcon name="accessibility" /></span>
+            <p
+              >Aksesibilitas<small
+                >Pilihan tambahan agar mudah dibaca. Disimpan di perangkat
+                ini.</small
+              ></p
+            >
+          </div>
+          <button
+            v-for="o in PILIHAN_A11Y"
+            :key="o.flag"
+            type="button"
+            class="srow srow-sw below-lg"
+            :class="{ 'fine-only': o.halus }"
+            role="switch"
+            :aria-checked="a11y[o.flag]"
+            @click="toggleA11y(o.flag)"
+          >
+            <p>{{ o.label }}<small>{{ o.petunjuk }}</small></p>
+            <span
+              class="switch"
+              :class="{ on: a11y[o.flag] }"
+              aria-hidden="true"
+            />
+          </button>
+          <div class="srow below-lg">
+            <button
+              type="button"
+              class="btn btn-outline btn-block"
+              @click="reset"
+            >
+              <AppIcon name="reset" />Atur ulang semua
+            </button>
+          </div>
+          <button
+            type="button"
+            class="srow srow-open only-lg"
+            @click="bukaPanel"
+          >
+            <span class="lead-i"><AppIcon name="accessibility" /></span>
+            <p
+              >Aksesibilitas dan tampilan<small
+                >Buka panel: tema, ukuran teks, kontras, dan lainnya</small
+              ></p
+            >
+            <AppIcon name="chevron-right" />
+          </button>
+        </template>
       </div>
     </section>
 
@@ -138,14 +211,14 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useMeta } from 'quasar'
+import { useMeta, Platform } from 'quasar'
 import AppIcon from '@/components/AppIcon.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import NavLink from '@/components/NavLink.vue'
 import NotificationSheet from '@/components/NotificationSheet.vue'
 import { APP_VERSION } from '@/config/env.js'
 import { RELATED_LINKS } from '@/config/hosts.js'
-import { getHalamanList } from '@/services/api.js'
+import { PILIHAN_A11Y, TEMA, UKURAN_TEKS } from '@/config/aksesibilitas.js'
 import {
   JENIS_NOTIFIKASI,
   matikan,
@@ -153,35 +226,39 @@ import {
   ubahJenis,
   useNotifications
 } from '@/services/notifications.js'
+import { useA11yPanel } from '@/composables/useA11yPanel.js'
 import { useAppearance } from '@/composables/useAppearance.js'
-import { useResource } from '@/composables/useResource.js'
+import { useProfilDaftar } from '@/composables/useProfilDaftar.js'
 
-const TEMA = [
-  { value: 'system', label: 'Sistem' },
-  { value: 'light', label: 'Terang' },
-  { value: 'dark', label: 'Gelap' }
-]
-const UKURAN = [
-  { value: 'normal', label: 'Normal' },
-  { value: 'large', label: 'Besar' },
-  { value: 'xlarge', label: 'Sangat besar' }
-]
+useMeta({ title: 'Profil' })
 
-useMeta({ title: 'Info' })
+// Aplikasi Android memakai pengaturan aksesibilitas sistem: tanpa widget dan
+// tanpa pilihan aksesibilitas di sini.
+const native = Platform.is.capacitor
 
-const { state: tampilan, setTheme, setText } = useAppearance()
+const {
+  state: tampilan,
+  a11y,
+  setTheme,
+  setText,
+  toggleA11y,
+  reset
+} = useAppearance()
+const { show: tampilkanPanel } = useA11yPanel()
 const { state: notif } = useNotifications()
 const dukungan = computed(() => notificationSupport())
 const sheetOpen = ref(false)
 
 const {
-  data: daftar,
+  data: daftarData,
+  daftar,
   error: listError,
   reload: reloadList
-} = useResource(signal => getHalamanList({ signal }), {
-  cacheKey: 'halaman:daftar',
-  ttlMs: 10 * 60 * 1000
-})
+} = useProfilDaftar()
+
+function bukaPanel(event) {
+  tampilkanPanel(event.currentTarget)
+}
 
 function toggleNotif() {
   if (notif.aktif) matikan()

@@ -1,24 +1,12 @@
 <template>
   <div class="wrap about">
-    <nav class="sidenav" aria-label="Halaman Tentang Kami">
-      <template v-for="(p, i) in daftar" :key="p.slug">
-        <span v-if="p.grup && daftar[i - 1]?.grup !== p.grup" class="grp">{{
-          p.grup
-        }}</span>
-        <NavLink
-          :to="`/tentang/${p.slug}`"
-          :current="p.slug === aktif"
-          :class="{ sub: p.grup }"
-          >{{ p.judul }}</NavLink
-        >
-      </template>
-    </nav>
+    <ProfilNav :daftar="daftar" :aktif="aktif" />
 
     <article class="prose">
       <p class="crumbs crumbs-top">
         <NavLink to="/">Beranda</NavLink>
         <AppIcon name="chevron-right" size="xs" />
-        <NavLink to="/tentang">Tentang</NavLink>
+        <NavLink to="/profil">Profil</NavLink>
         <template v-if="halaman">
           <AppIcon name="chevron-right" size="xs" />
           <span>{{ halaman.judul }}</span>
@@ -69,24 +57,23 @@ import { useMeta } from 'quasar'
 import AppIcon from '@/components/AppIcon.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import NavLink from '@/components/NavLink.vue'
+import ProfilNav from '@/components/ProfilNav.vue'
 import SafeHtml from '@/components/SafeHtml.vue'
 import SkeletonCards from '@/components/SkeletonCards.vue'
-import { getHalaman, getHalamanList, halamanBerkasUrl } from '@/services/api.js'
+import { getHalaman, halamanBerkasUrl } from '@/services/api.js'
 import { useBarTitle } from '@/composables/useBarTitle.js'
+import { useProfilDaftar } from '@/composables/useProfilDaftar.js'
 import { useResource } from '@/composables/useResource.js'
 
 const route = useRoute()
 
 const {
   data: daftarData,
+  daftar,
   error: listError,
   loading: listLoading,
   reload: reloadList
-} = useResource(signal => getHalamanList({ signal }), {
-  cacheKey: 'halaman:daftar',
-  ttlMs: 10 * 60 * 1000
-})
-const daftar = computed(() => daftarData.value ?? [])
+} = useProfilDaftar()
 
 // Tanpa slug di URL: tampilkan halaman pertama dari daftar.
 const aktif = computed(() => route.params.slug || daftar.value[0]?.slug || '')
@@ -98,7 +85,7 @@ const {
   reload
 } = useResource(signal => getHalaman(aktif.value, { signal }), {
   sources: [aktif],
-  enabled: () => route.name === 'tentang' && aktif.value !== '',
+  enabled: () => route.name === 'profil' && aktif.value !== '',
   cacheKey: () => `halaman:${aktif.value}`,
   ttlMs: 10 * 60 * 1000
 })
@@ -106,6 +93,6 @@ const {
 const galat = computed(() => listError.value ?? error.value)
 const muatUlang = () => (listError.value ? reloadList() : reload())
 
-useMeta(() => ({ title: halaman.value?.judul ?? 'Tentang' }))
+useMeta(() => ({ title: halaman.value?.judul ?? 'Profil' }))
 useBarTitle(() => halaman.value?.judul)
 </script>

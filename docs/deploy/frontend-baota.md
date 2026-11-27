@@ -35,13 +35,16 @@ di bagian 7):
 
 ## 2. Yang harus Anda isi dari server sendiri
 
-| Nilai                                                        | Dari mana                                                                                                                                                                                 |
-| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Gateway dan subnet `baota_net` (`TRUST_PROXY`, host akun DB) | `docker network inspect baota_net --format '{{range .IPAM.Config}}subnet={{.Subnet}} gateway={{.Gateway}}{{end}}'`, lalu amati ulang lewat `docker logs jdih_api` (lihat `api/README.md`) |
-| Baris proxy ke `ildis_app` dan `client_max_body_size`        | vhost situs sekarang (bagian di antara `SALIN-DARI-VHOST-LAMA` di `baota-locations.conf`). Isi bawaan hanyalah dasar yang umum di Baota dan BELUM dicocokkan dengan vhost Anda.           |
-| Blok `location /` lama                                       | vhost sekarang (untuk blok `LAMA-MULAI`, jalan kembali)                                                                                                                                   |
-| `JDIH_FOOTER_CONTACT`                                        | alamat/kontak footer asli; kosong = kolom Kontak tidak tampil                                                                                                                             |
-| Jalur root SPA, jalur berkas `jdih-security-headers.conf`    | bebas; contoh di bawah memakai `/www/wwwroot/jdih-spa` dan `/www/server/nginx/conf/`                                                                                                      |
+| Nilai                                                            | Dari mana                                                                                                                                                                                            |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gateway dan subnet `baota_net` (`TRUST_PROXY`, host akun DB)     | `docker network inspect baota_net --format '{{range .IPAM.Config}}subnet={{.Subnet}} gateway={{.Gateway}}{{end}}'`, lalu amati ulang lewat `docker logs jdih_api` (lihat `api/README.md`)            |
+| Baris proxy ke `ildis_app` dan `client_max_body_size`            | vhost situs sekarang (bagian di antara `SALIN-DARI-VHOST-LAMA` di `baota-locations.conf`). Isi bawaan hanyalah dasar yang umum di Baota dan BELUM dicocokkan dengan vhost Anda.                      |
+| Blok `location /` lama                                           | vhost sekarang (untuk blok `LAMA-MULAI`, jalan kembali)                                                                                                                                              |
+| `JDIH_FOOTER_CONTACT`                                            | alamat/kontak footer asli; kosong = kolom Kontak tidak tampil                                                                                                                                        |
+| `JDIH_WHATSAPP`                                                  | nomor WhatsApp resmi instansi untuk tombol kanan bawah; kosong = tombol tidak tampil                                                                                                                 |
+| `JDIH_KEBIJAKAN_*`, `JDIH_ASISTEN_LOKASI`, `JDIH_ASISTEN_SIMPAN` | isian naskah Kebijakan Privasi dan Cookie yang hanya diketahui instansi (kontak, tanggal, masa simpan log, lokasi pemrosesan Asisten); kosong = penanda "[diisi instansi]" dan label "Naskah contoh" |
+| `JDIH_ASISTEN_URL` dan layanan Asisten                           | OPSIONAL; layanan Asisten tidak ada di repo ini. Kosong = tombol Asisten, panelnya, dan butirnya di kebijakan tidak dirender (bagian 9)                                                              |
+| Jalur root SPA, jalur berkas `jdih-security-headers.conf`        | bebas; contoh di bawah memakai `/www/wwwroot/jdih-spa` dan `/www/server/nginx/conf/`                                                                                                                 |
 
 ## 3. Build (di mesin pengembang atau CI)
 
@@ -49,6 +52,9 @@ di bagian 7):
 cp .env.example .env     # lalu isi:
 #   JDIH_NEWS_FILTER=produk hukum,peraturan daerah,dprd
 #   JDIH_FOOTER_CONTACT=GANTI_ALAMAT_DAN_KONTAK        (kosong = kolom Kontak tidak tampil)
+#   JDIH_WHATSAPP=GANTI_NOMOR_WHATSAPP                 (kosong = tombol WhatsApp tidak tampil)
+#   JDIH_ASISTEN_URL=                                  (kosong = tanpa Asisten; lihat bagian 9)
+#   JDIH_KEBIJAKAN_KONTAK=...                          (lihat .env.example; kosong = "[diisi instansi]")
 npm ci
 npm run check            # format, lint, gerbang keamanan, tes unit
 npm run build            # hasil: dist/spa (nilai .env DITANAM ke bundel: PUBLIK)
@@ -207,21 +213,22 @@ Cadangan penuh: pulihkan `GANTI_NAMA_SITUS.conf.bak-TANGGAL` lalu reload.
 
 Daftar URL lama diambil dari penjelajahan situs publik lama dan isi feed (belum tentu lengkap; cocokkan dengan
 log, bagian 5). Rute SPA: `/`, `/dokumen`, `/dokumen/:id(\d{1,10})`, `/pembentukan-puu/:kategori?`, `/berita`,
-`/statistik`, `/tentang/:slug?`, `/info`; selain itu halaman "tidak ditemukan" di dalam SPA (status 200).
+`/statistik`, `/profil/:slug?`, `/info` (hub Profil), `/kebijakan-privasi`, `/kebijakan-cookie`, dan `/tentang/:slug?`
+(dialihkan di dalam SPA ke `/profil/:slug?`); selain itu halaman "tidak ditemukan" di dalam SPA (status 200).
 
-| URL lama (ildis_app)                                                                                                          | Setelah peralihan                              | Bentrok?                      |
-| ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------- |
-| `/dokumen/<id>-<slug>` (feed `urlDetailPeraturan`)                                                                            | tidak cocok rute -> "tidak ditemukan"          | **ya**                        |
-| `/dokumen/download?id=<berkas>&docId=<id>`                                                                                    | "tidak ditemukan"                              | **ya** (tautan unduh beredar) |
-| `/dokumen/peraturan`, `/dokumen/monografi`, `/dokumen/artikel`, `/dokumen/putusan`, `/dokumen/index`, `/dokumen/index2?id=UU` | "tidak ditemukan"                              | **ya**                        |
-| `/berita/index`                                                                                                               | "tidak ditemukan"                              | **ya**                        |
-| `/site/sekilas-sejarah`, `dasar-hukum`, `visi`, `misi`, `sop`                                                                 | "tidak ditemukan" (padanan: `/tentang/<slug>`) | **ya**                        |
-| `/site/pengelola`, `/site/sto`, `/site/stoinstansi`                                                                           | "tidak ditemukan" (padanan belum jelas)        | ya, butuh keputusan           |
-| `/site/login`                                                                                                                 | "tidak ditemukan"                              | periksa (bagian 5, butir 5)   |
-| `/dokumen`, `/statistik`                                                                                                      | halaman SPA dengan nama yang sama              | tidak (maksudnya sama)        |
-| `/backend...`, `/feed/...`, `/common/dokumen/...`                                                                             | tetap `ildis_app` (`^~`)                       | tidak                         |
-| `/assets/...`                                                                                                                 | aset SPA (aset situs lama tidak dibutuhkan)    | sengaja                       |
-| `/frontend/assets/...`, `/images/...`, `robots.txt`, `sitemap.xml`                                                            | jatuh ke `index.html` (HTML, status 200)       | periksa (bagian 5, butir 4)   |
+| URL lama (ildis_app)                                                                                                          | Setelah peralihan                             | Bentrok?                      |
+| ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------- |
+| `/dokumen/<id>-<slug>` (feed `urlDetailPeraturan`)                                                                            | tidak cocok rute -> "tidak ditemukan"         | **ya**                        |
+| `/dokumen/download?id=<berkas>&docId=<id>`                                                                                    | "tidak ditemukan"                             | **ya** (tautan unduh beredar) |
+| `/dokumen/peraturan`, `/dokumen/monografi`, `/dokumen/artikel`, `/dokumen/putusan`, `/dokumen/index`, `/dokumen/index2?id=UU` | "tidak ditemukan"                             | **ya**                        |
+| `/berita/index`                                                                                                               | "tidak ditemukan"                             | **ya**                        |
+| `/site/sekilas-sejarah`, `dasar-hukum`, `visi`, `misi`, `sop`                                                                 | "tidak ditemukan" (padanan: `/profil/<slug>`) | **ya**                        |
+| `/site/pengelola`, `/site/sto`, `/site/stoinstansi`                                                                           | "tidak ditemukan" (padanan belum jelas)       | ya, butuh keputusan           |
+| `/site/login`                                                                                                                 | "tidak ditemukan"                             | periksa (bagian 5, butir 5)   |
+| `/dokumen`, `/statistik`                                                                                                      | halaman SPA dengan nama yang sama             | tidak (maksudnya sama)        |
+| `/backend...`, `/feed/...`, `/common/dokumen/...`                                                                             | tetap `ildis_app` (`^~`)                      | tidak                         |
+| `/assets/...`                                                                                                                 | aset SPA (aset situs lama tidak dibutuhkan)   | sengaja                       |
+| `/frontend/assets/...`, `/images/...`, `robots.txt`, `sitemap.xml`                                                            | jatuh ke `index.html` (HTML, status 200)      | periksa (bagian 5, butir 4)   |
 
 **Usulan penjaga di nginx (tidak ada di `deploy/`; tempel di vhost SEBELUM `location /` bila Anda setuju).**
 Regex yang memuat `{...}` wajib diberi tanda kutip. Diuji dengan nginx 1.28 (bagian 8).
@@ -232,7 +239,7 @@ location = /dokumen/peraturan                    { return 301 https://$host/doku
 location ~ ^/dokumen/(monografi|artikel|putusan)$ { return 301 https://$host/dokumen?tipe=$1; }
 location = /dokumen/index                        { return 301 https://$host/dokumen; }
 location = /berita/index                         { return 301 https://$host/berita; }
-location ~ ^/site/(sekilas-sejarah|dasar-hukum|visi|misi|sop)$ { return 301 https://$host/tentang/$1; }
+location ~ ^/site/(sekilas-sejarah|dasar-hukum|visi|misi|sop)$ { return 301 https://$host/profil/$1; }
 location = /dokumen/download {
     if ($arg_docId ~ "^[0-9]{1,10}$") { return 302 https://$host/dokumen/$arg_docId; }
     return 302 https://$host/dokumen;
@@ -275,3 +282,22 @@ menangkap `/`), perilaku `ildis_app` sebenarnya (stub hanya meniru yang Anda seb
 JDIHN (apakah dan bagaimana membaca feed), HTTP/2 dan HTTP/3 (uji memakai HTTP/1.1), perilaku `my.cnf` kustom
 Baota, alamat gateway di Linux (diamati hanya di Docker Desktop), perangkat Android sungguhan.
 Location regex gaya Baota di uji adalah PERKIRAAN pola bawaan, bukan salinan vhost Anda.
+
+## 9. Pratinjau PDF, WhatsApp, dan Asisten (kanan bawah)
+
+**Pratinjau PDF** memakai pdf.js (`pdfjs-dist`, versi dipin di `package.json`) yang dimuat malas saat dibutuhkan.
+Berkasnya diambil dengan `fetch` ke URL lampiran yang sama dengan tombol Unduh, jadi **API dan CSP tidak berubah**
+(`connect-src` sudah memuat origin situs). Tiga berkas pendukung ikut di `dist/spa/assets/pdfjs/<versi>/`
+(worker dan dua dekoder JavaScript); semuanya satu origin dan dilayani `location ^~ /assets/` (header SPA, tipe
+`.js`, cache). Aplikasi tidak memakai WebAssembly, jadi CSP tidak perlu `'wasm-unsafe-eval'`. Batas ukuran berkas
+untuk pratinjau 25 MB (nilai awal, `PDF_MAX_BYTES` di `src/services/pdf.js`); berkas yang dialihkan API ke host luar
+(`FILE_REDIRECT_HOSTS`) tidak dapat dipratinjau dan tampil sebagai "berkas di situs lain".
+
+**WhatsApp** hanya tautan `https://wa.me/<nomor>?text=...` (tanpa skrip). Nomor dari `JDIH_WHATSAPP`.
+
+**Asisten** (opsional): tombol, panel, dan butir kebijakannya hanya dirender bila `JDIH_ASISTEN_URL` berisi jalur
+satu origin (mis. `/asisten/chat`). Layanan Asisten tidak ada di repo ini. Pasang blok `location = /asisten/chat`
+(dikomentari) di `deploy/baota-locations.conf` setelah layanannya ada; aturan di sana: hanya POST, badan kecil, batas laju per
+IP, tanpa jalur admin. Aplikasi Android tidak menampilkan Asisten (permintaan lintas origin butuh CORS); WhatsApp tetap ada.
+Percakapan tidak disimpan di perangkat. Masa simpan dan lokasi pemrosesan pertanyaan harus diisi instansi
+(`JDIH_ASISTEN_SIMPAN`, `JDIH_ASISTEN_LOKASI`) sebelum diaktifkan, karena tertulis di Kebijakan Privasi.

@@ -73,28 +73,65 @@ const routes = [
         }
       },
       {
-        path: 'tentang/:slug([a-z0-9-]{1,120})?',
-        name: 'tentang',
-        component: () => import('@/pages/TentangPage.vue'),
+        path: 'profil/:slug([a-z0-9-]{1,120})?',
+        name: 'profil',
+        component: () => import('@/pages/ProfilPage.vue'),
         meta: {
           bar: 'back',
-          barTitle: 'Tentang',
+          barTitle: 'Profil',
           back: '/info',
-          nav: 'tentang',
-          app: 'info',
-          title: 'Tentang'
+          nav: 'profil',
+          app: 'profil',
+          title: 'Profil'
         }
       },
+      // Tautan lama (/tentang) tetap bekerja: pengalihan di dalam SPA ke /profil.
+      {
+        path: 'tentang/:slug([a-z0-9-]{1,120})?',
+        redirect: to => ({
+          path: to.params.slug ? `/profil/${to.params.slug}` : '/profil',
+          query: to.query,
+          hash: to.hash
+        })
+      },
+      // Hub Profil untuk layar sempit: halaman instansi, kebijakan, notifikasi,
+      // tampilan, dan tautan terkait. Alamat /info dipertahankan.
       {
         path: 'info',
         name: 'info',
         component: () => import('@/pages/InfoPage.vue'),
         meta: {
           bar: 'title',
-          barTitle: 'Info',
-          nav: 'tentang',
-          app: 'info',
-          title: 'Info'
+          barTitle: 'Profil',
+          nav: 'profil',
+          app: 'profil',
+          title: 'Profil'
+        }
+      },
+      {
+        path: 'kebijakan-privasi',
+        name: 'kebijakan-privasi',
+        component: () => import('@/pages/KebijakanPrivasiPage.vue'),
+        meta: {
+          bar: 'back',
+          barTitle: 'Kebijakan Privasi',
+          back: '/info',
+          nav: 'profil',
+          app: 'profil',
+          title: 'Kebijakan Privasi'
+        }
+      },
+      {
+        path: 'kebijakan-cookie',
+        name: 'kebijakan-cookie',
+        component: () => import('@/pages/KebijakanCookiePage.vue'),
+        meta: {
+          bar: 'back',
+          barTitle: 'Kebijakan Cookie',
+          back: '/info',
+          nav: 'profil',
+          app: 'profil',
+          title: 'Kebijakan Cookie'
         }
       },
       // Selalu terakhir: halaman tidak ditemukan tetap berada di dalam layout.

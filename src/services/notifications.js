@@ -71,6 +71,17 @@ export async function matikan() {
   persist()
 }
 
+/**
+ * Mengembalikan pilihan notifikasi ke bawaan (nonaktif, tiga jenis awal) tanpa
+ * menulis ke penyimpanan: dipakai "Hapus data tersimpan" yang justru menghapus
+ * entrinya.
+ */
+export async function resetNotifikasi() {
+  if (provider && state.aktif) await provider.unsubscribeAll()
+  state.aktif = false
+  state.jenis = [...BAWAAN]
+}
+
 export async function ubahJenis(jenis) {
   if (provider && state.aktif) await provider.subscribe(jenis)
   state.jenis = [...jenis]
